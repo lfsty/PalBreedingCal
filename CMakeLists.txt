@@ -1,40 +1,63 @@
-cmake_minimum_required(VERSION 3.5) # CMake install : https://cmake.org/download/
+cmake_minimum_required(VERSION 3.5)
 project(PalBreeding LANGUAGES CXX)
 
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
-set(CMAKE_PREFIX_PATH "c:/Qt/Qt5.14.2/5.14.2/msvc2017_64") # Qt Kit Dir
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-# Specify MSVC UTF-8 encoding   
-add_compile_options("$<$<C_COMPILER_ID:MSVC>:/utf-8>")
-add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
-
-find_package(Qt5 REQUIRED COMPONENTS Gui Core Widgets)
-
-set(linkLibrariesList
-    Qt5::Widgets
+set(SOURCES_LIST
+    ${CMAKE_CURRENT_LIST_DIR}/code/src/main.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/code/src/mainwindow.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/code/src/PalManager.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/code/src/PalModel.cpp
 )
 
-file(GLOB_RECURSE ${PROJECT_NAME}_SRC
-    ${CMAKE_CURRENT_LIST_DIR}/code/src/*.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/code/src/*.h
-    ${CMAKE_CURRENT_LIST_DIR}/code/inc/*.h
-    ${CMAKE_CURRENT_LIST_DIR}/code/ui/*.ui
+set(HEADERS_LIST
+    ${CMAKE_CURRENT_LIST_DIR}/code/inc/mainwindow.h
+    ${CMAKE_CURRENT_LIST_DIR}/code/inc/PalManager.h
+    ${CMAKE_CURRENT_LIST_DIR}/code/inc/PalModel.h
+)
+
+set(RESOURCES_LIST
     ${CMAKE_CURRENT_LIST_DIR}/code/resources/resource.qrc
 )
 
-add_executable(${PROJECT_NAME} WIN32 ${${PROJECT_NAME}_SRC})
+set(UI_LIST
+    ${CMAKE_CURRENT_LIST_DIR}/code/ui/mainwindow.ui
+)
 
-set_target_properties(${PROJECT_NAME} PROPERTIES
-    AUTOUIC_SEARCH_PATHS "${CMAKE_CURRENT_SOURCE_DIR}/code/ui"
+set(EXE_TYPE)
+if(WIN32)
+    set(EXE_TYPE WIN32)
+endif()
+
+add_executable(${PROJECT_NAME}
+    ${EXE_TYPE}
+    ${SOURCES_LIST}
+    ${HEADERS_LIST}
+    ${RESOURCES_LIST}
+    ${UI_LIST}
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/code/inc)
 
-target_link_libraries(${PROJECT_NAME} PRIVATE ${linkLibrariesList})
+find_package(Qt6 COMPONENTS Core QUIET)
+if (NOT Qt6_FOUND)
+    set(QT_VERSION_MAJOR 5)
+elseif()
+    set(QT_VERSION_MAJOR 6)
+endif()
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Gui Widgets)
+
+target_link_libraries(${PROJECT_NAME} PRIVATE 
+    Qt${QT_VERSION_MAJOR}::Core
+    Qt${QT_VERSION_MAJOR}::Gui
+    Qt${QT_VERSION_MAJOR}::Widgets
+)
+
+set_target_properties(${PROJECT_NAME} PROPERTIES
+    AUTOUIC_SEARCH_PATHS "${CMAKE_CURRENT_SOURCE_DIR}/code/ui"
+)
