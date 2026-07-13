@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file>db/breeding.json</file>
+        <file>db/db.json</file>
+    </qresource>
+</RCC>
