@@ -6,6 +6,8 @@
 #include <QStandardItemModel>
 #include <QString>
 
+#include <PalManager.h>
+
 namespace Ui
 {
 class MainWindow;

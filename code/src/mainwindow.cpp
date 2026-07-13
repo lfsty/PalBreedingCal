@@ -79,18 +79,7 @@ void MainWindow::updateComboAndList()
 
             for (auto breedData : breedingSet)
             {
-                BreedingData _tmpBreedData;
-                if (breedData->parent1->getLocalizedName() == parent1Name)
-                {
-                    _tmpBreedData.parent1 = breedData->parent1;
-                    _tmpBreedData.parent2 = breedData->parent2;
-                }
-                else
-                {
-                    _tmpBreedData.parent1 = breedData->parent2;
-                    _tmpBreedData.parent2 = breedData->parent1;
-                }
-                _tmpBreedData.child = breedData->child;
+                BreedingData _tmpBreedData = breedData->copy(breedData->parent2->getLocalizedName() == parent1Name);
                 breedingList.append(_tmpBreedData);
             }
         }
@@ -100,18 +89,7 @@ void MainWindow::updateComboAndList()
 
             for (auto breedData : breedingSet)
             {
-                BreedingData _tmpBreedData;
-                if (breedData->parent2->getLocalizedName() == parent2Name)
-                {
-                    _tmpBreedData.parent1 = breedData->parent1;
-                    _tmpBreedData.parent2 = breedData->parent2;
-                }
-                else
-                {
-                    _tmpBreedData.parent1 = breedData->parent2;
-                    _tmpBreedData.parent2 = breedData->parent1;
-                }
-                _tmpBreedData.child = breedData->child;
+                BreedingData _tmpBreedData = breedData->copy(breedData->parent1->getLocalizedName() == parent2Name);
                 breedingList.append(_tmpBreedData);
             }
         }
@@ -121,11 +99,7 @@ void MainWindow::updateComboAndList()
             QSet<BreedingData*> breedingSet = PalManager::getBreedingListByChildName(allBreedingSet, childName);
             for (auto breedData : breedingSet)
             {
-                BreedingData _tmpBreedData;
-                _tmpBreedData.parent1 = breedData->parent1;
-                _tmpBreedData.parent2 = breedData->parent2;
-                _tmpBreedData.child   = breedData->child;
-                breedingList.append(_tmpBreedData);
+                breedingList.append(*breedData);
             }
         }
     }
@@ -136,18 +110,7 @@ void MainWindow::updateComboAndList()
         breedingSet                     = PalManager::getBreedingListByParentOneName(breedingSet, parent2Name);
         for (auto breedData : breedingSet)
         {
-            BreedingData _tmpBreedData;
-            if (breedData->parent1->getLocalizedName() == parent1Name)
-            {
-                _tmpBreedData.parent1 = breedData->parent1;
-                _tmpBreedData.parent2 = breedData->parent2;
-            }
-            else
-            {
-                _tmpBreedData.parent1 = breedData->parent2;
-                _tmpBreedData.parent2 = breedData->parent1;
-            }
-            _tmpBreedData.child = breedData->child;
+            BreedingData _tmpBreedData = breedData->copy(breedData->parent2->getLocalizedName() == parent1Name);
             breedingList.append(_tmpBreedData);
         }
     }
@@ -161,18 +124,7 @@ void MainWindow::updateComboAndList()
             breedingSet = PalManager::getBreedingListByParentOneName(breedingSet, parent1Name);
             for (auto breedData : breedingSet)
             {
-                BreedingData _tmpBreedData;
-                if (breedData->parent1->getLocalizedName() == parent1Name)
-                {
-                    _tmpBreedData.parent1 = breedData->parent1;
-                    _tmpBreedData.parent2 = breedData->parent2;
-                }
-                else
-                {
-                    _tmpBreedData.parent1 = breedData->parent2;
-                    _tmpBreedData.parent2 = breedData->parent1;
-                }
-                _tmpBreedData.child = breedData->child;
+                BreedingData _tmpBreedData = breedData->copy(breedData->parent2->getLocalizedName() == parent1Name);
                 breedingList.append(_tmpBreedData);
             }
         }
@@ -181,18 +133,7 @@ void MainWindow::updateComboAndList()
             breedingSet = PalManager::getBreedingListByParentOneName(breedingSet, parent2Name);
             for (auto breedData : breedingSet)
             {
-                BreedingData _tmpBreedData;
-                if (breedData->parent2->getLocalizedName() == parent2Name)
-                {
-                    _tmpBreedData.parent1 = breedData->parent1;
-                    _tmpBreedData.parent2 = breedData->parent2;
-                }
-                else
-                {
-                    _tmpBreedData.parent1 = breedData->parent2;
-                    _tmpBreedData.parent2 = breedData->parent1;
-                }
-                _tmpBreedData.child = breedData->child;
+                BreedingData _tmpBreedData = breedData->copy(breedData->parent1->getLocalizedName() == parent2Name);
                 breedingList.append(_tmpBreedData);
             }
         }
@@ -205,18 +146,7 @@ void MainWindow::updateComboAndList()
         breedingSet                     = PalManager::getBreedingListByChildName(breedingSet, childName);
         for (auto breedData : breedingSet)
         {
-            BreedingData _tmpBreedData;
-            if (breedData->parent1->getLocalizedName() == parent1Name)
-            {
-                _tmpBreedData.parent1 = breedData->parent1;
-                _tmpBreedData.parent2 = breedData->parent2;
-            }
-            else
-            {
-                _tmpBreedData.parent1 = breedData->parent2;
-                _tmpBreedData.parent2 = breedData->parent1;
-            }
-            _tmpBreedData.child = breedData->child;
+            BreedingData _tmpBreedData = breedData->copy(breedData->parent2->getLocalizedName() == parent1Name);
             breedingList.append(_tmpBreedData);
         }
     }

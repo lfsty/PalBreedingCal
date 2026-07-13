@@ -12,6 +12,24 @@ struct BreedingData
     PalModel* parent1;
     PalModel* parent2;
     PalModel* child;
+
+    BreedingData copy(bool swapParent) const
+    {
+        BreedingData _tmpBreedData;
+        if (swapParent)
+        {
+            _tmpBreedData.parent1 = parent2;
+            _tmpBreedData.parent2 = parent1;
+        }
+        else
+        {
+            _tmpBreedData.parent1 = parent1;
+            _tmpBreedData.parent2 = parent2;
+        }
+        _tmpBreedData.child = child;
+
+        return _tmpBreedData;
+    }
 };
 
 class PalManager
