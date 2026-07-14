@@ -26,9 +26,6 @@ protected:
 
 private:
     Ui::MainWindow* ui;
-    QCompleter* m_parent1Completer      = nullptr;
-    QCompleter* m_parent2Completer      = nullptr;
-    QCompleter* m_childCompleter        = nullptr;
     QStandardItemModel* m_breedingModel = nullptr;
 };
 

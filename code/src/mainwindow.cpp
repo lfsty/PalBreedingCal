@@ -24,22 +24,22 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent),
     QStringList m_palNames = { "" };
     m_palNames.append(PalManager::getInstance()->getPalLocalNameList());
 
-    m_parent1Completer = new QCompleter(m_palNames, this);
-    m_parent2Completer = new QCompleter(m_palNames, this);
-    m_childCompleter   = new QCompleter(m_palNames, this);
-    m_parent1Completer->setFilterMode(Qt::MatchContains);
-    m_parent2Completer->setFilterMode(Qt::MatchContains);
-    m_childCompleter->setFilterMode(Qt::MatchContains);
+    QCompleter* _parent1Completer = new QCompleter(m_palNames, this);
+    QCompleter* _parent2Completer = new QCompleter(m_palNames, this);
+    QCompleter* _childCompleter   = new QCompleter(m_palNames, this);
+    _parent1Completer->setFilterMode(Qt::MatchContains);
+    _parent2Completer->setFilterMode(Qt::MatchContains);
+    _childCompleter->setFilterMode(Qt::MatchContains);
+    ui->parent1Combo->setCompleter(_parent1Completer);
+    ui->parent2Combo->setCompleter(_parent2Completer);
+    ui->childCombo->setCompleter(_childCompleter);
+
     ui->parent1Combo->addItems(m_palNames);
     ui->parent2Combo->addItems(m_palNames);
     ui->childCombo->addItems(m_palNames);
-
     ui->parent1Combo->setCurrentIndex(0);
     ui->parent2Combo->setCurrentIndex(0);
     ui->childCombo->setCurrentIndex(0);
-    ui->parent1Combo->setCompleter(m_parent1Completer);
-    ui->parent2Combo->setCompleter(m_parent2Completer);
-    ui->childCombo->setCompleter(m_childCompleter);
 
     m_breedingModel = new QStandardItemModel(this);
     ui->breedingTable->setModel(m_breedingModel);
@@ -65,90 +65,54 @@ void MainWindow::updateComboAndList()
     QString parent2Name = ui->parent2Combo->currentText();
     QString childName   = ui->childCombo->currentText();
 
-    const QSet<BreedingData*>& allBreedingSet = PalManager::getInstance()->getBreedingList();
+    const bool hasParent1 = !parent1Name.isEmpty();
+    const bool hasParent2 = !parent2Name.isEmpty();
+    const bool hasChild   = !childName.isEmpty();
 
+    if (!hasParent1 && !hasParent2 && !hasChild)
+    {
+        m_breedingModel->clear();
+        m_breedingModel->setRowCount(0);
+        m_breedingModel->setColumnCount(3);
+        m_breedingModel->setHorizontalHeaderLabels(QStringList() << "parent1" << "parent2" << "child");
+        return;
+    }
+
+    // 逐步叠加过滤条件：从全集出发，依次按 parent1 → parent2 → child 过滤
+    QSet<BreedingData*> breedingSet = PalManager::getInstance()->getBreedingList();
+    if (hasParent1)
+    {
+        breedingSet = PalManager::getBreedingListByParentOneName(breedingSet, parent1Name);
+    }
+
+    if (hasParent2)
+    {
+        breedingSet = PalManager::getBreedingListByParentOneName(breedingSet, parent2Name);
+    }
+
+    if (hasChild)
+    {
+        breedingSet = PalManager::getBreedingListByChildName(breedingSet, childName);
+    }
+
+    // 遍历结果集，必要时通过 copy(swap) 确保"被搜索的父本"始终显示为 parent1
     QVector<BreedingData> breedingList;
-    if ((!parent1Name.isEmpty() && parent2Name.isEmpty() && childName.isEmpty()) ||
-        (parent1Name.isEmpty() && !parent2Name.isEmpty() && childName.isEmpty()) ||
-        (parent1Name.isEmpty() && parent2Name.isEmpty() && !childName.isEmpty()))
+    for (auto breedData : breedingSet)
     {
-        // 有且仅有一个为不空的情况下
-        if (!parent1Name.isEmpty())
+        bool needSwap = false;
+        if (hasParent1)
         {
-            QSet<BreedingData*> breedingSet = PalManager::getBreedingListByParentOneName(allBreedingSet, parent1Name);
+            // 指定了 parent1：若数据中匹配到的是 parent2，则交换，使 parent1Name 出现在 parent1 位置
+            needSwap = (breedData->parent2->getLocalizedName() == parent1Name);
+        }
+        else if (hasParent2)
+        {
+            // 仅指定了 parent2：若数据中匹配到的是 parent1，则交换，使 parent2Name 出现在 parent1 位置
+            needSwap = (breedData->parent1->getLocalizedName() == parent2Name);
+        }
 
-            for (auto breedData : breedingSet)
-            {
-                BreedingData _tmpBreedData = breedData->copy(breedData->parent2->getLocalizedName() == parent1Name);
-                breedingList.append(_tmpBreedData);
-            }
-        }
-        else if (!parent2Name.isEmpty())
-        {
-            QSet<BreedingData*> breedingSet = PalManager::getBreedingListByParentOneName(allBreedingSet, parent2Name);
-
-            for (auto breedData : breedingSet)
-            {
-                BreedingData _tmpBreedData = breedData->copy(breedData->parent1->getLocalizedName() == parent2Name);
-                breedingList.append(_tmpBreedData);
-            }
-        }
-        else if (!childName.isEmpty())
-        {
-            // 孩子不空的情况下
-            QSet<BreedingData*> breedingSet = PalManager::getBreedingListByChildName(allBreedingSet, childName);
-            for (auto breedData : breedingSet)
-            {
-                breedingList.append(*breedData);
-            }
-        }
-    }
-    else if (!parent1Name.isEmpty() && !parent2Name.isEmpty() && childName.isEmpty())
-    {
-        // 父母都不为空，孩子为空
-        QSet<BreedingData*> breedingSet = PalManager::getBreedingListByParentOneName(allBreedingSet, parent1Name);
-        breedingSet                     = PalManager::getBreedingListByParentOneName(breedingSet, parent2Name);
-        for (auto breedData : breedingSet)
-        {
-            BreedingData _tmpBreedData = breedData->copy(breedData->parent2->getLocalizedName() == parent1Name);
-            breedingList.append(_tmpBreedData);
-        }
-    }
-    else if ((!parent1Name.isEmpty() && parent2Name.isEmpty() && !childName.isEmpty()) ||
-             (parent1Name.isEmpty() && !parent2Name.isEmpty() && !childName.isEmpty()))
-    {
-        // 孩子不为空，父母有一个为空
-        QSet<BreedingData*> breedingSet = PalManager::getBreedingListByChildName(allBreedingSet, childName);
-        if (!parent1Name.isEmpty())
-        {
-            breedingSet = PalManager::getBreedingListByParentOneName(breedingSet, parent1Name);
-            for (auto breedData : breedingSet)
-            {
-                BreedingData _tmpBreedData = breedData->copy(breedData->parent2->getLocalizedName() == parent1Name);
-                breedingList.append(_tmpBreedData);
-            }
-        }
-        else if (!parent2Name.isEmpty())
-        {
-            breedingSet = PalManager::getBreedingListByParentOneName(breedingSet, parent2Name);
-            for (auto breedData : breedingSet)
-            {
-                BreedingData _tmpBreedData = breedData->copy(breedData->parent1->getLocalizedName() == parent2Name);
-                breedingList.append(_tmpBreedData);
-            }
-        }
-    }
-    else if (!parent1Name.isEmpty() && !parent2Name.isEmpty() && !childName.isEmpty())
-    {
-        // 三个都不为空
-        QSet<BreedingData*> breedingSet = PalManager::getBreedingListByParentOneName(allBreedingSet, parent1Name);
-        breedingSet                     = PalManager::getBreedingListByParentOneName(breedingSet, parent2Name);
-        breedingSet                     = PalManager::getBreedingListByChildName(breedingSet, childName);
-        for (auto breedData : breedingSet)
-        {
-            BreedingData _tmpBreedData = breedData->copy(breedData->parent2->getLocalizedName() == parent1Name);
-            breedingList.append(_tmpBreedData);
-        }
+        // hasParent1 和 hasParent2 均为 false（仅指定了 child）：无需交换
+        breedingList.append(hasParent1 || hasParent2 ? breedData->copy(needSwap) : *breedData);
     }
 
     m_breedingModel->clear();
