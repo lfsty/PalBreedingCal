@@ -118,49 +118,87 @@ bool PalManager::loadDB(const QString& palDBPath, const QString& breedingDbPath)
         }
     }
 
+    // 构建索引以加速查询
+    buildIndexes();
+
     return true;
 }
 
-QSet<BreedingModel*> PalManager::getBreedingListByParentOneName(const QSet<BreedingModel*>& breedingList, const QString& parentName)
+void PalManager::buildIndexes()
 {
-    if (parentName.isEmpty() || breedingList.empty())
-    {
-        return QSet<BreedingModel*>();
-    }
-    else
-    {
-        QSet<BreedingModel*> retData;
+    m_parentIndex.clear();
+    m_childIndex.clear();
 
-        for (auto breeding : breedingList)
-        {
-            if (breeding->parent1->getLocalizedName() == parentName || breeding->parent2->getLocalizedName() == parentName)
-            {
-                retData.insert(breeding);
-            }
-        }
+    for (BreedingModel* breeding : m_breedingList)
+    {
+        const QString& p1Name = breeding->parent1->getLocalizedName();
+        const QString& p2Name = breeding->parent2->getLocalizedName();
+        const QString& cName  = breeding->child->getLocalizedName();
 
-        return retData;
+        m_parentIndex[p1Name].insert(breeding);
+        m_parentIndex[p2Name].insert(breeding);
+        m_childIndex[cName].insert(breeding);
     }
 }
 
-QSet<BreedingModel*> PalManager::getBreedingListByChildName(const QSet<BreedingModel*>& breedingList, const QString& chindName)
+QSet<BreedingModel*> PalManager::getBreedingListByFilter(const QString& parent1Name, const QString& parent2Name, const QString& childName) const
 {
-    if (chindName.isEmpty() || breedingList.empty())
+    const bool hasParent1 = !parent1Name.isEmpty();
+    const bool hasParent2 = !parent2Name.isEmpty();
+    const bool hasChild   = !childName.isEmpty();
+
+    if (!hasParent1 && !hasParent2 && !hasChild)
     {
-        return QSet<BreedingModel*>();
+        return {};
+    }
+
+    QSet<BreedingModel*> result;
+
+    if (hasParent1 && hasParent2 && parent1Name == parent2Name)
+    {
+        // 两个父本相同：要求 breeding 的两个父本都匹配
+        const QSet<BreedingModel*>& set1 = m_parentIndex.value(parent1Name);
+        QSet<BreedingModel*> filtered;
+        for (BreedingModel* b : set1)
+        {
+            if (b->parent1->getLocalizedName() == parent1Name && b->parent2->getLocalizedName() == parent1Name)
+            {
+                filtered.insert(b);
+            }
+        }
+        result = filtered;
     }
     else
     {
-        QSet<BreedingModel*> retData;
-
-        for (auto breeding : breedingList)
+        if (hasParent1)
         {
-            if (breeding->child->getLocalizedName() == chindName)
-            {
-                retData.insert(breeding);
-            }
+            result = m_parentIndex.value(parent1Name);
         }
 
-        return retData;
+        if (hasParent2)
+        {
+            if (result.empty())
+            {
+                result = m_parentIndex.value(parent2Name);
+            }
+            else
+            {
+                result.intersect(m_parentIndex.value(parent2Name));
+            }
+        }
     }
+
+    if (hasChild)
+    {
+        if (result.empty())
+        {
+            result = m_childIndex.value(childName);
+        }
+        else
+        {
+            result.intersect(m_childIndex.value(childName));
+        }
+    }
+
+    return result;
 }
