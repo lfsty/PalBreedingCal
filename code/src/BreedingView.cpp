@@ -43,9 +43,14 @@ void BreedingView::paintEvent(QPaintEvent* event)
     paintSinglePal(&painter, paintPalRect.translated((palContentWidth + palContentHeight) * 2, 0), m_model.child);
 
     // 绘制加号
+    painter.setPen(Qt::black);
+    QFont font = painter.font();
+    font.setPointSize(20);
+    painter.setFont(font);
+
     QRect paintPlusRect = QRect(palContentWidth, 0, plusWidth, palContentHeight);
-    paintPlus(&painter, paintPlusRect);
-    paintPlus(&painter, paintPlusRect.translated(palContentWidth + palContentHeight, 0));
+    painter.drawText(paintPlusRect, Qt::AlignCenter, "+");
+    painter.drawText(paintPlusRect.translated(palContentWidth + palContentHeight, 0), Qt::AlignCenter, "=");
 }
 
 void BreedingView::paintSinglePal(QPainter* painter, const QRect& rect, const PalModel* pal) const
@@ -55,16 +60,23 @@ void BreedingView::paintSinglePal(QPainter* painter, const QRect& rect, const Pa
         return;
     }
 
-    painter->drawText(rect, Qt::AlignCenter, pal->getLocalizedName());
-}
-
-void BreedingView::paintPlus(QPainter* painter, const QRect& rect) const
-{
     painter->save();
 
-    painter->setPen(Qt::black);
-    painter->drawLine(rect.left(), rect.center().y(), rect.right(), rect.center().y());
-    painter->drawLine(rect.center().x(), rect.top(), rect.center().x(), rect.bottom());
+    QRect textRect = painter->boundingRect(rect, Qt::AlignCenter, pal->getLocalizedName());
+    painter->drawText(textRect, Qt::AlignCenter, pal->getLocalizedName());
+
+    constexpr int ownedRadius = 5;
+    QRect ownedRect           = QRect(textRect.left() - 2 * ownedRadius, rect.top(), ownedRadius, rect.height());
+    if (pal->isOwned())
+    {
+        painter->setBrush(Qt::green);
+    }
+    else
+    {
+        painter->setBrush(Qt::red);
+    }
+    painter->setPen(Qt::NoPen);
+    painter->drawEllipse(ownedRect.center(), ownedRadius, ownedRadius);
 
     painter->restore();
 }
