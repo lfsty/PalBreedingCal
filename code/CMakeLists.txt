@@ -7,12 +7,16 @@ set(SOURCES_LIST
     ${CMAKE_CURRENT_LIST_DIR}/src/mainwindow.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/PalManager.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/PalModel.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/BreedingListView.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/BreedingModel.cpp
 )
 
 set(HEADERS_LIST
     ${CMAKE_CURRENT_LIST_DIR}/inc/mainwindow.h
     ${CMAKE_CURRENT_LIST_DIR}/inc/PalManager.h
     ${CMAKE_CURRENT_LIST_DIR}/inc/PalModel.h
+    ${CMAKE_CURRENT_LIST_DIR}/inc/BreedingListView.h
+    ${CMAKE_CURRENT_LIST_DIR}/inc/BreedingModel.h
 )
 
 set(RESOURCES_LIST
@@ -23,17 +27,15 @@ set(UI_LIST
     ${CMAKE_CURRENT_LIST_DIR}/ui/mainwindow.ui
 )
 
-set(EXE_TYPE)
-if(WIN32)
-    set(EXE_TYPE WIN32)
-endif()
-
 add_executable(${PROJECT_NAME}
-    ${EXE_TYPE}
     ${SOURCES_LIST}
     ${HEADERS_LIST}
     ${RESOURCES_LIST}
     ${UI_LIST}
+)
+
+set_target_properties(${PROJECT_NAME} PROPERTIES
+    WIN32_EXECUTABLE $<$<AND:$<PLATFORM_ID:Windows>,$<CONFIG:Release>>:TRUE>
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/inc)

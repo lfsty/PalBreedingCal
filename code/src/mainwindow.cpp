@@ -5,6 +5,7 @@
 #include <QStandardItemModel>
 #include <QStringListModel>
 
+#include <BreedingListView.h>
 #include <PalManager.h>
 #include <PalModel.h>
 
@@ -42,10 +43,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent),
     ui->parent2Combo->setCurrentIndex(0);
     ui->childCombo->setCurrentIndex(0);
 
-    ui->breedingTable->setModel(new QStandardItemModel(this));
-    ui->breedingTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    ui->breedingTable->horizontalHeader()->setSectionsMovable(false);
-    ui->breedingTable->verticalHeader()->hide();
+    connect(this, &MainWindow::requestUpdateBreedingView, ui->breedingViewFrame, &BreedingListView::updateBreedingView);
 
     updateBreedingList();
 
@@ -69,12 +67,12 @@ void MainWindow::updateBreedingList()
     const bool hasParent2 = !parent2Name.isEmpty();
     const bool hasChild   = !childName.isEmpty();
 
-    QVector<BreedingData> breedingList;
+    QVector<BreedingModel> breedingList;
 
     if (hasParent1 || hasParent2 || hasChild)
     {
         // 逐步叠加过滤条件：从全集出发，依次按 parent1 → parent2 → child 过滤
-        QSet<BreedingData*> breedingSet = PalManager::getInstance()->getBreedingList();
+        QSet<BreedingModel*> breedingSet = PalManager::getInstance()->getBreedingList();
         if (hasParent1)
         {
             breedingSet = PalManager::getBreedingListByParentOneName(breedingSet, parent1Name);
@@ -82,7 +80,23 @@ void MainWindow::updateBreedingList()
 
         if (hasParent2)
         {
-            breedingSet = PalManager::getBreedingListByParentOneName(breedingSet, parent2Name);
+            if (parent1Name == parent2Name)
+            {
+                // 当两个父本相同时，需要确保 breeding 中两个父本都匹配该名称
+                QSet<BreedingModel*> filtered;
+                for (auto breeding : breedingSet)
+                {
+                    if (breeding->parent1->getLocalizedName() == parent2Name && breeding->parent2->getLocalizedName() == parent2Name)
+                    {
+                        filtered.insert(breeding);
+                    }
+                }
+                breedingSet = filtered;
+            }
+            else
+            {
+                breedingSet = PalManager::getBreedingListByParentOneName(breedingSet, parent2Name);
+            }
         }
 
         if (hasChild)
@@ -90,8 +104,7 @@ void MainWindow::updateBreedingList()
             breedingSet = PalManager::getBreedingListByChildName(breedingSet, childName);
         }
 
-        // 遍历结果集，必要时通过 copy(swap) 确保"被搜索的父本"始终显示为 parent1
-
+        // 遍历结果集，必要时通过 copy(swap) 确保"被搜索的父本"始终显示为对应的内容
         for (auto breedData : breedingSet)
         {
             bool needSwap = false;
@@ -111,30 +124,5 @@ void MainWindow::updateBreedingList()
         }
     }
 
-    updateBreedingView(breedingList);
-}
-
-void MainWindow::updateBreedingView(const QVector<BreedingData>& breedingList)
-{
-    QStandardItemModel* breedingDataModel = qobject_cast<QStandardItemModel*>(ui->breedingTable->model());
-    if (breedingDataModel == nullptr)
-    {
-        return;
-    }
-
-    const QStringList headLabels = QStringList() << "parent1" << "parent2" << "child";
-    breedingDataModel->clear();
-    breedingDataModel->setRowCount(breedingList.size());
-    breedingDataModel->setColumnCount(3);
-    breedingDataModel->setHorizontalHeaderLabels(headLabels);
-
-    if (!breedingList.empty())
-    {
-        for (int i = 0; i < breedingList.size(); i++)
-        {
-            breedingDataModel->setItem(i, 0, new QStandardItem(breedingList[i].parent1->getLocalizedName()));
-            breedingDataModel->setItem(i, 1, new QStandardItem(breedingList[i].parent2->getLocalizedName()));
-            breedingDataModel->setItem(i, 2, new QStandardItem(breedingList[i].child->getLocalizedName()));
-        }
-    }
+    emit requestUpdateBreedingView(breedingList);
 }
