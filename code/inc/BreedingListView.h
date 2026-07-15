@@ -1,8 +1,11 @@
 #pragma once
 
 #include <QFrame>
+#include <QVector>
 
 class BreedingModel;
+class BreedingView;
+class QFrame;
 
 class BreedingListView : public QFrame
 {
@@ -18,5 +21,7 @@ public slots:
 private:
     QWidget* m_contentWidget = nullptr;
 
-signals:
+    // widget 池：复用而非重建
+    QVector<BreedingView*> m_itemPool;
+    QVector<QFrame*> m_separatorPool;
 };

@@ -32,42 +32,76 @@ BreedingListView::BreedingListView(QWidget* parent) : QFrame(parent)
 
 BreedingListView::~BreedingListView()
 {
+    // 清理 widget 池
+    for (auto w : m_itemPool)
+    {
+        delete w;
+    }
+    for (auto s : m_separatorPool)
+    {
+        delete s;
+    }
 }
 
 void BreedingListView::updateBreedingView(const QVector<BreedingModel>& breedingList)
 {
-    // 清空布局
     QVBoxLayout* breedingLayout = qobject_cast<QVBoxLayout*>(m_contentWidget->layout());
-    if (!breedingLayout->isEmpty())
+    const int newCount          = breedingList.size();
+
+    // 1. 确保池中有足够的 BreedingView
+    while (m_itemPool.size() < newCount)
     {
-        while (QLayoutItem* child = breedingLayout->takeAt(0))
-        {
-            if (child->widget())
-            {
-                delete child->widget();  // 直接销毁控件，避免异步残留
-            }
+        // 用空模型创建，稍后 setModel 更新
+        auto* view = new BreedingView(BreedingModel{}, m_contentWidget);
+        m_itemPool.append(view);
+    }
 
-            delete child;  // 释放布局项占用的内存
+    // 2. 确保池中有足够的分隔线（每个条目一条，顶部一条）
+    const int sepNeeded = newCount > 0 ? newCount + 1 : 0;
+    while (m_separatorPool.size() < sepNeeded)
+    {
+        auto* line = new QFrame(m_contentWidget);
+        line->setFrameShape(QFrame::HLine);
+        line->setFrameShadow(QFrame::Sunken);
+        m_separatorPool.append(line);
+    }
+
+    // 3. 清空布局（不删除 widget，只从布局中移除）
+    while (QLayoutItem* item = breedingLayout->takeAt(0))
+    {
+        delete item;  // 只删除 layout item，不删 widget
+    }
+
+    // 4. 按顺序添加需要的 widget 到布局
+    if (newCount > 0)
+    {
+        // 顶部分割线
+        breedingLayout->addWidget(m_separatorPool[0]);
+        m_separatorPool[0]->show();
+
+        for (int i = 0; i < newCount; ++i)
+        {
+            // 更新数据
+            m_itemPool[i]->setModel(breedingList[i]);
+            m_itemPool[i]->show();
+            breedingLayout->addWidget(m_itemPool[i]);
+
+            // 底部分割线
+            breedingLayout->addWidget(m_separatorPool[i + 1]);
+            m_separatorPool[i + 1]->show();
         }
     }
 
-    if (!breedingList.empty())
-    {  // 添加分割线
-        QFrame* line = new QFrame();
-        line->setFrameShape(QFrame::HLine);    // 设置为水平线
-        line->setFrameShadow(QFrame::Sunken);  // 设置为凹陷效果
-        breedingLayout->addWidget(line);
-
-        for (auto breedingData : breedingList)
-        {
-            breedingLayout->addWidget(new BreedingView(breedingData, m_contentWidget));
-
-            // 添加分割线
-            QFrame* line = new QFrame();
-            line->setFrameShape(QFrame::HLine);    // 设置为水平线
-            line->setFrameShadow(QFrame::Sunken);  // 设置为凹陷效果
-            breedingLayout->addWidget(line);
-        }
-        breedingLayout->addStretch();
+    // 5. 隐藏多余的 widget
+    for (int i = newCount; i < m_itemPool.size(); ++i)
+    {
+        m_itemPool[i]->hide();
     }
+    for (int i = sepNeeded; i < m_separatorPool.size(); ++i)
+    {
+        m_separatorPool[i]->hide();
+    }
+
+    // 6. 底部弹簧
+    breedingLayout->addStretch();
 }
