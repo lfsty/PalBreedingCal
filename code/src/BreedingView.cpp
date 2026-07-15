@@ -1,7 +1,7 @@
 #include "BreedingView.h"
 
 #include <QHBoxLayout>
-#include <QLabel>
+#include <QPainter>
 
 #include <BreedingModel.h>
 #include <PalModel.h>
@@ -9,20 +9,7 @@
 BreedingView::BreedingView(const BreedingModel& model, QWidget* parent) : QWidget(parent)
 {
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-
-    QHBoxLayout* layout = new QHBoxLayout(this);
-    layout->setContentsMargins(0, 0, 0, 0);
-    layout->setSpacing(0);
-
-    m_parent1Label = new QLabel(this);
-    m_parent2Label = new QLabel(this);
-    m_childLabel   = new QLabel(this);
-
-    layout->addWidget(m_parent1Label);
-    layout->addWidget(new QLabel("+", this));
-    layout->addWidget(m_parent2Label);
-    layout->addWidget(new QLabel("=", this));
-    layout->addWidget(m_childLabel);
+    setFixedHeight(30);
 
     if (model.parent1)
     {
@@ -30,18 +17,54 @@ BreedingView::BreedingView(const BreedingModel& model, QWidget* parent) : QWidge
     }
 }
 
-void BreedingView::setModel(const BreedingModel& model)
+void BreedingView::paintEvent(QPaintEvent* event)
 {
-    if (model.parent1)
+    if (!m_model.parent1 || !m_model.parent2 || !m_model.child)
     {
-        m_parent1Label->setText(model.parent1->getLocalizedName());
+        return;
     }
-    if (model.parent2)
+
+    QPainter painter(this);
+    painter.setRenderHint(QPainter::Antialiasing, true);
+
+    QPen pen;
+    pen.setWidth(2);
+    pen.setColor(Qt::black);
+    painter.setPen(pen);
+
+    int palContentHeight = rect().height();
+    int plusWidth        = palContentHeight;
+    int palContentWidth  = (rect().width() - 2 * plusWidth) / 3;
+
+    // 绘制帕鲁信息
+    QRect paintPalRect = QRect(0, 0, palContentWidth, palContentHeight);
+    paintSinglePal(&painter, paintPalRect, m_model.parent1);
+    paintSinglePal(&painter, paintPalRect.translated(palContentWidth + palContentHeight, 0), m_model.parent2);
+    paintSinglePal(&painter, paintPalRect.translated((palContentWidth + palContentHeight) * 2, 0), m_model.child);
+
+    // 绘制加号
+    QRect paintPlusRect = QRect(palContentWidth, 0, plusWidth, palContentHeight);
+    paintPlus(&painter, paintPlusRect);
+    paintPlus(&painter, paintPlusRect.translated(palContentWidth + palContentHeight, 0));
+}
+
+void BreedingView::paintSinglePal(QPainter* painter, const QRect& rect, const PalModel* pal) const
+{
+    if (!pal)
     {
-        m_parent2Label->setText(model.parent2->getLocalizedName());
+        return;
     }
-    if (model.child)
-    {
-        m_childLabel->setText(model.child->getLocalizedName());
-    }
+
+    painter->drawText(rect, Qt::AlignCenter, pal->getLocalizedName());
+}
+
+void BreedingView::paintPlus(QPainter* painter, const QRect& rect) const
+{
+    painter->save();
+
+    painter->setPen(Qt::black);
+    painter->drawLine(rect.left(), rect.center().y(), rect.right(), rect.center().y());
+    painter->drawLine(rect.center().x(), rect.top(), rect.center().x(), rect.bottom());
+
+    painter->restore();
 }
