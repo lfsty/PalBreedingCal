@@ -1,5 +1,8 @@
 # 幻兽帕鲁配种计算器
 
+[![Windows](https://github.com/lfsty/PalBreedingCal/actions/workflows/windows.yml/badge.svg)](https://github.com/lfsty/PalBreedingCal/actions/workflows/windows.yml)[![Linux](https://github.com/lfsty/PalBreedingCal/actions/workflows/linux.yml/badge.svg)](https://github.com/lfsty/PalBreedingCal/actions/workflows/linux.yml)
+
+
 本地计算帕鲁配种公式
 
 ![image-20260715143823536](img/image-20260715143823536.png)
