@@ -105,7 +105,7 @@ bool PalManager::loadDB(const QString& palDBPath, const QString& breedingDbPath)
                 continue;
             }
 
-            BreedingData* breeding = new BreedingData{ parent1PalModel, parent2PalModel, childPalModel };
+            BreedingModel* breeding = new BreedingModel{ parent1PalModel, parent2PalModel, childPalModel };
 
             // qDebug() << parent1PalModel->getLocalizedName() + " + " + parent2PalModel->getLocalizedName() + " = " + childPalModel->getLocalizedName();
 
@@ -121,15 +121,15 @@ bool PalManager::loadDB(const QString& palDBPath, const QString& breedingDbPath)
     return true;
 }
 
-QSet<BreedingData*> PalManager::getBreedingListByParentOneName(const QSet<BreedingData*>& breedingList, const QString& parentName)
+QSet<BreedingModel*> PalManager::getBreedingListByParentOneName(const QSet<BreedingModel*>& breedingList, const QString& parentName)
 {
     if (parentName.isEmpty() || breedingList.empty())
     {
-        return QSet<BreedingData*>();
+        return QSet<BreedingModel*>();
     }
     else
     {
-        QSet<BreedingData*> retData;
+        QSet<BreedingModel*> retData;
 
         for (auto breeding : breedingList)
         {
@@ -143,15 +143,15 @@ QSet<BreedingData*> PalManager::getBreedingListByParentOneName(const QSet<Breedi
     }
 }
 
-QSet<BreedingData*> PalManager::getBreedingListByChildName(const QSet<BreedingData*>& breedingList, const QString& chindName)
+QSet<BreedingModel*> PalManager::getBreedingListByChildName(const QSet<BreedingModel*>& breedingList, const QString& chindName)
 {
     if (chindName.isEmpty() || breedingList.empty())
     {
-        return QSet<BreedingData*>();
+        return QSet<BreedingModel*>();
     }
     else
     {
-        QSet<BreedingData*> retData;
+        QSet<BreedingModel*> retData;
 
         for (auto breeding : breedingList)
         {

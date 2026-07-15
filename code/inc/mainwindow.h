@@ -3,7 +3,7 @@
 
 #include <QMainWindow>
 
-struct BreedingData;
+class BreedingModel;
 
 namespace Ui
 {
@@ -22,9 +22,9 @@ protected slots:
     // 跟新接口，更新数据和刷新界面
     void updateBreedingList();
 
-private:
-    // 内部接口，用于更新界面
-    void updateBreedingView(const QVector<BreedingData>& breedingList);
+signals:
+    // 内部信号，用于更新界面
+    void requestUpdateBreedingView(const QVector<BreedingModel>& breedingList);
 
 private:
     Ui::MainWindow* ui;
