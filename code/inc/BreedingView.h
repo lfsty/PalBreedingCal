@@ -18,7 +18,6 @@ protected:
 
 private:
     void paintSinglePal(QPainter* painter, const QRect& rect, const PalModel* pal) const;
-    void paintPlus(QPainter* painter, const QRect& rect) const;
 
 private:
     BreedingModel m_model;
