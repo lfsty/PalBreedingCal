@@ -1,0 +1,38 @@
+name: Linux
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+  workflow_dispatch:
+
+env:
+  BUILD_TYPE: Release
+
+jobs:
+  build-and-release:
+    name: Build on Linux
+
+    runs-on: ubuntu-latest
+
+    steps:
+      # install Qt SDK
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '5.15.*'
+  
+      # Checkout code
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      # CMake Config
+      - name: Configure Cmake
+        run: cmake -B build -S . -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+      
+      # Cmake Build
+      - name: Build Project
+        run: cmake --build build --config ${{env.BUILD_TYPE}}
