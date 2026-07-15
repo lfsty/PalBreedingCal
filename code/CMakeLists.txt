@@ -9,6 +9,7 @@ set(SOURCES_LIST
     ${CMAKE_CURRENT_LIST_DIR}/src/PalModel.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/BreedingListView.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/BreedingModel.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/BreedingView.cpp
 )
 
 set(HEADERS_LIST
@@ -17,6 +18,7 @@ set(HEADERS_LIST
     ${CMAKE_CURRENT_LIST_DIR}/inc/PalModel.h
     ${CMAKE_CURRENT_LIST_DIR}/inc/BreedingListView.h
     ${CMAKE_CURRENT_LIST_DIR}/inc/BreedingModel.h
+    ${CMAKE_CURRENT_LIST_DIR}/inc/BreedingView.h
 )
 
 set(RESOURCES_LIST

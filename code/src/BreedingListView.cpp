@@ -5,6 +5,7 @@
 #include <QVBoxLayout>
 
 #include <BreedingModel.h>
+#include <BreedingView.h>
 #include <PalModel.h>
 
 #include <QDebug>
@@ -25,6 +26,8 @@ BreedingListView::BreedingListView(QWidget* parent) : QFrame(parent)
     m_contentWidget = new QWidget(scrollArea);
     scrollArea->setWidget(m_contentWidget);
     QVBoxLayout* breedingLayout = new QVBoxLayout(m_contentWidget);
+    breedingLayout->setContentsMargins(0, 0, 0, 0);
+    breedingLayout->setSpacing(10);
 }
 
 BreedingListView::~BreedingListView()
@@ -41,18 +44,30 @@ void BreedingListView::updateBreedingView(const QVector<BreedingModel>& breeding
         {
             if (child->widget())
             {
-                child->widget()->deleteLater();  // 彻底销毁控件，释放内存
+                delete child->widget();  // 直接销毁控件，避免异步残留
             }
 
             delete child;  // 释放布局项占用的内存
         }
     }
 
-    for (auto breedingData : breedingList)
-    {
-        QString dispString = breedingData.parent1->getLocalizedName() + " + " + breedingData.parent2->getLocalizedName() + " = " + breedingData.child->getLocalizedName();
+    if (!breedingList.empty())
+    {  // 添加分割线
+        QFrame* line = new QFrame();
+        line->setFrameShape(QFrame::HLine);    // 设置为水平线
+        line->setFrameShadow(QFrame::Sunken);  // 设置为凹陷效果
+        breedingLayout->addWidget(line);
 
-        breedingLayout->addWidget(new QLabel(dispString));
+        for (auto breedingData : breedingList)
+        {
+            breedingLayout->addWidget(new BreedingView(breedingData, m_contentWidget));
+
+            // 添加分割线
+            QFrame* line = new QFrame();
+            line->setFrameShape(QFrame::HLine);    // 设置为水平线
+            line->setFrameShadow(QFrame::Sunken);  // 设置为凹陷效果
+            breedingLayout->addWidget(line);
+        }
+        breedingLayout->addStretch();
     }
-    breedingLayout->addStretch();
 }
