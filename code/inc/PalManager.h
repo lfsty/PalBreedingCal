@@ -1,13 +1,16 @@
 #pragma once
 
 #include <QHash>
+#include <QObject>
 #include <QSet>
 #include <QString>
 
 #include <BreedingModel.h>
 
-class PalManager
+class PalManager : public QObject
 {
+    Q_OBJECT
+
 public:
     static PalManager* getInstance();
 
@@ -16,16 +19,22 @@ private:
     ~PalManager();
 
 public:
-    bool loadDB(const QString& palDBPath, const QString& breedingDbPath);
+    void requestLoadDB(const QString& palDBPath, const QString& breedingDbPath);
     const QSet<BreedingModel*>& getBreedingList() { return m_breedingList; }
     const QStringList& getPalLocalNameList() { return m_palLocalNameList; }
 
 public:
     QSet<BreedingModel*> getBreedingListByFilter(const QString& parent1Name, const QString& parent2Name, const QString& childName) const;
 
+signals:
+    void dataLoaded();
+
 private:
+    bool loadPalDB(const QString& palDBPath);
+    bool loadBreedingDB(const QString& breedingDbPath);
     void buildIndexes();
 
+private:
     QHash<QString, PalModel*> m_palMap;
     QSet<BreedingModel*> m_breedingList;
     QStringList m_palLocalNameList;

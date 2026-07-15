@@ -17,6 +17,12 @@ BreedingView::BreedingView(const BreedingModel& model, QWidget* parent) : QWidge
     }
 }
 
+void BreedingView::setModel(const BreedingModel& model)
+{
+    m_model = model;
+    update();
+}
+
 void BreedingView::paintEvent(QPaintEvent* event)
 {
     if (!m_model.parent1 || !m_model.parent2 || !m_model.child)

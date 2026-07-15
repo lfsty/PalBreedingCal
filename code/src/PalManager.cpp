@@ -4,6 +4,7 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QtConcurrent>
 
 #include <PalModel.h>
 
@@ -34,94 +35,117 @@ PalManager::~PalManager()
     m_breedingList.clear();
 }
 
-bool PalManager::loadDB(const QString& palDBPath, const QString& breedingDbPath)
+void PalManager::requestLoadDB(const QString& palDBPath, const QString& breedingDbPath)
 {
+    QtConcurrent::run([=]()
+                      {
+                          bool ret = loadPalDB(palDBPath);
+                          if (!ret)
+                          {
+                              return;
+                          }
+
+                          ret = loadBreedingDB(breedingDbPath);
+                          if (!ret)
+                          {
+                              return;
+                          }
+
+                          // 构建索引以加速查询
+                          buildIndexes();
+
+                          emit dataLoaded();
+                      });
+}
+
+bool PalManager::loadPalDB(const QString& palDBPath)
+{
+    // 加载db.json
+    QFile palDBFile(palDBPath);
+    if (!palDBFile.open(QIODevice::ReadOnly))
     {
-        // 加载db.json
-        QFile palDBFile(palDBPath);
-        if (!palDBFile.open(QIODevice::ReadOnly))
+        return false;
+    }
+
+    QJsonDocument jsonDoc       = QJsonDocument::fromJson(palDBFile.readAll());
+    QJsonObject palDBRootObject = jsonDoc.object();
+    QJsonArray palArray         = palDBRootObject["Pals"].toArray();
+
+    for (const QJsonValue& palValue : palArray)
+    {
+        PalModel* palModel = new PalModel();
+        if (!palModel->loadPalModel(palValue.toObject()))
         {
-            return false;
+            qDebug() << "load error: " << palValue;
+            delete palModel;
         }
-
-        QJsonDocument jsonDoc       = QJsonDocument::fromJson(palDBFile.readAll());
-        QJsonObject palDBRootObject = jsonDoc.object();
-        QJsonArray palArray         = palDBRootObject["Pals"].toArray();
-
-        for (const QJsonValue& palValue : palArray)
+        else
         {
-            PalModel* palModel = new PalModel();
-            if (!palModel->loadPalModel(palValue.toObject()))
-            {
-                qDebug() << "load error: " << palValue;
-                delete palModel;
-            }
-            else
-            {
-                m_palMap[palModel->getInternalName()] = palModel;
-                m_palLocalNameList.append(palModel->getLocalizedName());
-            }
-        }
-
-        if (m_palMap.empty())
-        {
-            return false;
+            m_palMap[palModel->getInternalName()] = palModel;
+            m_palLocalNameList.append(palModel->getLocalizedName());
         }
     }
 
+    if (m_palMap.empty())
     {
-        // 加载breeding.json
-        QFile breedingDBFile(breedingDbPath);
-        if (!breedingDBFile.open(QIODevice::ReadOnly))
-        {
-            return false;
-        }
+        return false;
+    }
+    else
+    {
+        return true;
+    }
+}
 
-        QJsonDocument jsonDoc       = QJsonDocument::fromJson(breedingDBFile.readAll());
-        QJsonObject palDBRootObject = jsonDoc.object();
-        QJsonArray breedingArray    = palDBRootObject["Breeding"].toArray();
-
-        for (const QJsonValue& breedingValue : breedingArray)
-        {
-            const QJsonObject& breedingObject = breedingValue.toObject();
-
-            QString parent1 = breedingObject["Parent1InternalName"].toString();
-            QString parent2 = breedingObject["Parent2InternalName"].toString();
-            QString child   = breedingObject["ChildInternalName"].toString();
-
-            if (parent1.isEmpty() || parent2.isEmpty() || child.isEmpty())
-            {
-                qDebug() << "load breeding error: " << breedingObject;
-                continue;
-            }
-
-            PalModel* parent1PalModel = m_palMap.value(parent1, nullptr);
-            PalModel* parent2PalModel = m_palMap.value(parent2, nullptr);
-            PalModel* childPalModel   = m_palMap.value(child, nullptr);
-
-            if (!parent1PalModel || !parent2PalModel || !childPalModel)
-            {
-                qDebug() << "PalModel not loaded " << breedingObject;
-                continue;
-            }
-
-            BreedingModel* breeding = new BreedingModel{ parent1PalModel, parent2PalModel, childPalModel };
-
-            // qDebug() << parent1PalModel->getLocalizedName() + " + " + parent2PalModel->getLocalizedName() + " = " + childPalModel->getLocalizedName();
-
-            m_breedingList.insert(breeding);
-        }
-
-        if (m_breedingList.empty())
-        {
-            return false;
-        }
+bool PalManager::loadBreedingDB(const QString& breedingDbPath)
+{
+    // 加载breeding.json
+    QFile breedingDBFile(breedingDbPath);
+    if (!breedingDBFile.open(QIODevice::ReadOnly))
+    {
+        return false;
     }
 
-    // 构建索引以加速查询
-    buildIndexes();
+    QJsonDocument jsonDoc       = QJsonDocument::fromJson(breedingDBFile.readAll());
+    QJsonObject palDBRootObject = jsonDoc.object();
+    QJsonArray breedingArray    = palDBRootObject["Breeding"].toArray();
 
-    return true;
+    for (const QJsonValue& breedingValue : breedingArray)
+    {
+        const QJsonObject& breedingObject = breedingValue.toObject();
+
+        QString parent1 = breedingObject["Parent1InternalName"].toString();
+        QString parent2 = breedingObject["Parent2InternalName"].toString();
+        QString child   = breedingObject["ChildInternalName"].toString();
+
+        if (parent1.isEmpty() || parent2.isEmpty() || child.isEmpty())
+        {
+            qDebug() << "load breeding error: " << breedingObject;
+            continue;
+        }
+
+        PalModel* parent1PalModel = m_palMap.value(parent1, nullptr);
+        PalModel* parent2PalModel = m_palMap.value(parent2, nullptr);
+        PalModel* childPalModel   = m_palMap.value(child, nullptr);
+
+        if (!parent1PalModel || !parent2PalModel || !childPalModel)
+        {
+            qDebug() << "PalModel not loaded " << breedingObject;
+            continue;
+        }
+
+        BreedingModel* breeding = new BreedingModel{ parent1PalModel, parent2PalModel, childPalModel };
+
+        m_breedingList.insert(breeding);
+    }
+
+    if (m_breedingList.empty())
+    {
+        return false;
+    }
+    else
+    {
+        return true;
+    }
 }
 
 void PalManager::buildIndexes()
