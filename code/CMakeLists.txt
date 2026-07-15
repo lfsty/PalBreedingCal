@@ -42,12 +42,12 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/inc)
 
-find_package(Qt6 COMPONENTS Core QUIET)
-if (NOT Qt6_FOUND)
+# find_package(Qt6 COMPONENTS Core QUIET)
+# if (NOT Qt6_FOUND)
     set(QT_VERSION_MAJOR 5)
-elseif()
-    set(QT_VERSION_MAJOR 6)
-endif()
+# else()
+#     set(QT_VERSION_MAJOR 6)
+# endif()
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Gui Widgets Concurrent)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE 
