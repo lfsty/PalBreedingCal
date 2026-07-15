@@ -1,9 +1,9 @@
 #pragma once
 
+#include <BreedingModel.h>
 #include <QWidget>
 
-class BreedingModel;
-class QLabel;
+class PalModel;
 
 class BreedingView : public QWidget
 {
@@ -11,12 +11,15 @@ class BreedingView : public QWidget
 
 public:
     explicit BreedingView(const BreedingModel& model, QWidget* parent = nullptr);
-    void setModel(const BreedingModel& model);
+    void setModel(const BreedingModel& model) { m_model = model; }
 
-signals:
+protected:
+    void paintEvent(QPaintEvent* event) override;
 
 private:
-    QLabel* m_parent1Label = nullptr;
-    QLabel* m_parent2Label = nullptr;
-    QLabel* m_childLabel   = nullptr;
+    void paintSinglePal(QPainter* painter, const QRect& rect, const PalModel* pal) const;
+    void paintPlus(QPainter* painter, const QRect& rect) const;
+
+private:
+    BreedingModel m_model;
 };
