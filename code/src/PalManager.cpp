@@ -121,16 +121,6 @@ bool PalManager::loadDB(const QString& palDBPath, const QString& breedingDbPath)
     return true;
 }
 
-QSet<BreedingData*> PalManager::getBreedingListByParentOneName(const QString& parentName)
-{
-    return getBreedingListByParentOneName(m_breedingList, parentName);
-}
-
-QSet<BreedingData*> PalManager::getBreedingListByChildName(const QString& childName)
-{
-    return getBreedingListByChildName(m_breedingList, childName);
-}
-
 QSet<BreedingData*> PalManager::getBreedingListByParentOneName(const QSet<BreedingData*>& breedingList, const QString& parentName)
 {
     if (parentName.isEmpty() || breedingList.empty())

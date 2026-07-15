@@ -1,12 +1,9 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <QCompleter>
 #include <QMainWindow>
-#include <QStandardItemModel>
-#include <QString>
 
-#include <PalManager.h>
+struct BreedingData;
 
 namespace Ui
 {
@@ -21,12 +18,16 @@ public:
     explicit MainWindow(QWidget* parent = nullptr);
     ~MainWindow();
 
-protected:
-    void updateComboAndList();
+protected slots:
+    // 跟新接口，更新数据和刷新界面
+    void updateBreedingList();
+
+private:
+    // 内部接口，用于更新界面
+    void updateBreedingView(const QVector<BreedingData>& breedingList);
 
 private:
     Ui::MainWindow* ui;
-    QStandardItemModel* m_breedingModel = nullptr;
 };
 
 #endif  // MAINWINDOW_H
