@@ -4,6 +4,7 @@
 #include <QCompleter>
 #include <QStandardItemModel>
 #include <QStringListModel>
+#include <QtConcurrent>
 
 #include <BreedingListView.h>
 #include <PalManager.h>
@@ -14,6 +15,8 @@
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent),
                                           ui(new Ui::MainWindow)
 {
+    qRegisterMetaType<QVector<BreedingModel>>("QVector<BreedingModel>");
+
     ui->setupUi(this);
 
     bool result = PalManager::getInstance()->loadDB(QStringLiteral(":/db/db.json"), QStringLiteral(":/db/breeding.json"));
@@ -63,66 +66,67 @@ void MainWindow::updateBreedingList()
     QString parent2Name = ui->parent2Combo->currentText();
     QString childName   = ui->childCombo->currentText();
 
-    const bool hasParent1 = !parent1Name.isEmpty();
-    const bool hasParent2 = !parent2Name.isEmpty();
-    const bool hasChild   = !childName.isEmpty();
+    QtConcurrent::run([=]()
+                      {
+                          const bool hasParent1 = !parent1Name.isEmpty();
+                          const bool hasParent2 = !parent2Name.isEmpty();
+                          const bool hasChild   = !childName.isEmpty();
+                          QVector<BreedingModel> breedingList;
+                          if (hasParent1 || hasParent2 || hasChild)
+                          {
+                              // 逐步叠加过滤条件：从全集出发，依次按 parent1 → parent2 → child 过滤
+                              QSet<BreedingModel*> breedingSet = PalManager::getInstance()->getBreedingList();
+                              if (hasParent1)
+                              {
+                                  breedingSet = PalManager::getBreedingListByParentOneName(breedingSet, parent1Name);
+                              }
 
-    QVector<BreedingModel> breedingList;
+                              if (hasParent2)
+                              {
+                                  if (parent1Name == parent2Name)
+                                  {
+                                      // 当两个父本相同时，需要确保 breeding 中两个父本都匹配该名称
+                                      QSet<BreedingModel*> filtered;
+                                      for (auto breeding : breedingSet)
+                                      {
+                                          if (breeding->parent1->getLocalizedName() == parent2Name && breeding->parent2->getLocalizedName() == parent2Name)
+                                          {
+                                              filtered.insert(breeding);
+                                          }
+                                      }
+                                      breedingSet = filtered;
+                                  }
+                                  else
+                                  {
+                                      breedingSet = PalManager::getBreedingListByParentOneName(breedingSet, parent2Name);
+                                  }
+                              }
 
-    if (hasParent1 || hasParent2 || hasChild)
-    {
-        // 逐步叠加过滤条件：从全集出发，依次按 parent1 → parent2 → child 过滤
-        QSet<BreedingModel*> breedingSet = PalManager::getInstance()->getBreedingList();
-        if (hasParent1)
-        {
-            breedingSet = PalManager::getBreedingListByParentOneName(breedingSet, parent1Name);
-        }
+                              if (hasChild)
+                              {
+                                  breedingSet = PalManager::getBreedingListByChildName(breedingSet, childName);
+                              }
 
-        if (hasParent2)
-        {
-            if (parent1Name == parent2Name)
-            {
-                // 当两个父本相同时，需要确保 breeding 中两个父本都匹配该名称
-                QSet<BreedingModel*> filtered;
-                for (auto breeding : breedingSet)
-                {
-                    if (breeding->parent1->getLocalizedName() == parent2Name && breeding->parent2->getLocalizedName() == parent2Name)
-                    {
-                        filtered.insert(breeding);
-                    }
-                }
-                breedingSet = filtered;
-            }
-            else
-            {
-                breedingSet = PalManager::getBreedingListByParentOneName(breedingSet, parent2Name);
-            }
-        }
+                              // 遍历结果集，必要时通过 copy(swap) 确保"被搜索的父本"始终显示为对应的内容
+                              for (auto breedData : breedingSet)
+                              {
+                                  bool needSwap = false;
+                                  if (hasParent1)
+                                  {
+                                      // 指定了 parent1：若数据中匹配到的是 parent2，则交换，使 parent1Name 出现在 parent1 位置
+                                      needSwap = (breedData->parent2->getLocalizedName() == parent1Name);
+                                  }
+                                  else if (hasParent2)
+                                  {
+                                      // 仅指定了 parent2：若数据中匹配到的是 parent1，则交换，使 parent2Name 出现在 parent1 位置
+                                      needSwap = (breedData->parent1->getLocalizedName() == parent2Name);
+                                  }
 
-        if (hasChild)
-        {
-            breedingSet = PalManager::getBreedingListByChildName(breedingSet, childName);
-        }
+                                  // hasParent1 和 hasParent2 均为 false（仅指定了 child）：无需交换
+                                  breedingList.append(hasParent1 || hasParent2 ? breedData->copy(needSwap) : *breedData);
+                              }
+                          }
 
-        // 遍历结果集，必要时通过 copy(swap) 确保"被搜索的父本"始终显示为对应的内容
-        for (auto breedData : breedingSet)
-        {
-            bool needSwap = false;
-            if (hasParent1)
-            {
-                // 指定了 parent1：若数据中匹配到的是 parent2，则交换，使 parent1Name 出现在 parent1 位置
-                needSwap = (breedData->parent2->getLocalizedName() == parent1Name);
-            }
-            else if (hasParent2)
-            {
-                // 仅指定了 parent2：若数据中匹配到的是 parent1，则交换，使 parent2Name 出现在 parent1 位置
-                needSwap = (breedData->parent1->getLocalizedName() == parent2Name);
-            }
-
-            // hasParent1 和 hasParent2 均为 false（仅指定了 child）：无需交换
-            breedingList.append(hasParent1 || hasParent2 ? breedData->copy(needSwap) : *breedData);
-        }
-    }
-
-    emit requestUpdateBreedingView(breedingList);
+                          emit requestUpdateBreedingView(breedingList);
+                      });
 }
