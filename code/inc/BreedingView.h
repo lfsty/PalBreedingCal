@@ -11,7 +11,7 @@ class BreedingView : public QWidget
 
 public:
     explicit BreedingView(const BreedingModel& model, QWidget* parent = nullptr);
-    void setModel(const BreedingModel& model) { m_model = model; }
+    void setModel(const BreedingModel& model);
 
 protected:
     void paintEvent(QPaintEvent* event) override;

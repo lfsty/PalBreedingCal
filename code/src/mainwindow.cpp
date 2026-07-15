@@ -19,12 +19,27 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent),
 
     ui->setupUi(this);
 
-    bool result = PalManager::getInstance()->loadDB(QStringLiteral(":/db/db.json"), QStringLiteral(":/db/breeding.json"));
+    connect(PalManager::getInstance(), &PalManager::dataLoaded, this, &MainWindow::updateComboBox);
 
-    if (!result)
-    {
-        qDebug() << "Failed to load DB";
-    }
+    connect(this, &MainWindow::requestUpdateBreedingView, ui->breedingViewFrame, &BreedingListView::updateBreedingView);
+
+    connect(ui->parent1Combo, &QComboBox::currentTextChanged, this, &MainWindow::updateBreedingList);
+    connect(ui->parent2Combo, &QComboBox::currentTextChanged, this, &MainWindow::updateBreedingList);
+    connect(ui->childCombo, &QComboBox::currentTextChanged, this, &MainWindow::updateBreedingList);
+
+    PalManager::getInstance()->requestLoadDB(QStringLiteral(":/db/db.json"), QStringLiteral(":/db/breeding.json"));
+}
+
+MainWindow::~MainWindow()
+{
+    delete ui;
+}
+
+void MainWindow::updateComboBox()
+{
+    QSignalBlocker blocker(ui->parent1Combo);
+    QSignalBlocker blocker2(ui->parent2Combo);
+    QSignalBlocker blocker3(ui->childCombo);
 
     QStringList m_palNames = { "" };
     m_palNames.append(PalManager::getInstance()->getPalLocalNameList());
@@ -46,18 +61,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent),
     ui->parent2Combo->setCurrentIndex(0);
     ui->childCombo->setCurrentIndex(0);
 
-    connect(this, &MainWindow::requestUpdateBreedingView, ui->breedingViewFrame, &BreedingListView::updateBreedingView);
-
     updateBreedingList();
-
-    connect(ui->parent1Combo, &QComboBox::currentTextChanged, this, &MainWindow::updateBreedingList);
-    connect(ui->parent2Combo, &QComboBox::currentTextChanged, this, &MainWindow::updateBreedingList);
-    connect(ui->childCombo, &QComboBox::currentTextChanged, this, &MainWindow::updateBreedingList);
-}
-
-MainWindow::~MainWindow()
-{
-    delete ui;
 }
 
 void MainWindow::updateBreedingList()
