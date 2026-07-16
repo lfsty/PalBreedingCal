@@ -15,7 +15,10 @@ public:
 
 public:
     bool loadPlayerDataFromJsonObject(const QJsonObject& jsonObject);
-    bool loadPalListDataFromJsonObject(const QJsonObject& jsonObject);
+
+    const QString& getPlayerUID() const { return m_playerUID; }
+    const QString& getPlayerNickName() const { return m_playerNickName; }
+    const bool isPalDataLoaded() const { return m_palDataLoaded; }
 
 private:
     QString m_playerUID      = "";

@@ -1,8 +1,8 @@
 #pragma once
 
+#include <QHash>
 #include <QJsonArray>
 #include <QJsonObject>
-#include <QVector>
 
 class PlayerModel;
 
@@ -13,11 +13,15 @@ public:
     ~PlayerListModel();
 
 public:
-    bool LoadPlayerListDataFromJsonArray(const QJsonArray& jsonArray);
-    bool LoadPlayerDataFromJsonObject(const QJsonObject& jsonObject);
+    bool LoadPlayerData(const QJsonArray& jsonArray);
+    bool LoadPlayerData(const QJsonObject& jsonObject);
 
 private:
-    QVector<PlayerModel*> m_playerList;
+    bool CreateNewPlayer(const QJsonObject& jsonObject);
+
+private:
+    // <uid, playerModel>
+    QHash<QString, PlayerModel*> m_playerMap;
 
 public:
     friend QDebug operator<<(QDebug debug, const PlayerListModel& data);

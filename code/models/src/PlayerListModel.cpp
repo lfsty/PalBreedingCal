@@ -10,47 +10,70 @@ PlayerListModel::PlayerListModel()
 
 PlayerListModel::~PlayerListModel()
 {
-    for (auto& player : m_playerList)
+    for (auto player : m_playerMap.values())
     {
         delete player;
     }
-    m_playerList.clear();
+    m_playerMap.clear();
 }
 
-bool PlayerListModel::LoadPlayerListDataFromJsonArray(const QJsonArray& jsonArray)
+bool PlayerListModel::LoadPlayerData(const QJsonArray& jsonArray)
 {
     for (auto& jsonPlayer : jsonArray)
     {
-        PlayerModel* player = new PlayerModel();
-        if (player->loadPlayerDataFromJsonObject(jsonPlayer.toObject()))
+        if (!LoadPlayerData(jsonPlayer.toObject()))
         {
-            m_playerList.append(player);
-        }
-        else
-        {
-            delete player;
+            return false;
         }
     }
 
-    return !m_playerList.empty();
+    return !m_playerMap.empty();
 }
 
-bool PlayerListModel::LoadPlayerDataFromJsonObject(const QJsonObject& jsonObject)
+bool PlayerListModel::LoadPlayerData(const QJsonObject& jsonObject)
 {
-    for (auto player : m_playerList)
+    if (jsonObject.empty())
     {
-        if (player->loadPalListDataFromJsonObject(jsonObject))
+        return false;
+    }
+
+    for (auto player : m_playerMap.values())
+    {
+        if (player->loadPlayerDataFromJsonObject(jsonObject))
         {
             return true;
         }
     }
 
-    return false;
+    // 到这，说明当前jsonObject中的数据没有匹配到任何已有的player
+    // 创建一个新的player，并添加到m_playerMap中
+
+    return CreateNewPlayer(jsonObject);
+}
+
+bool PlayerListModel::CreateNewPlayer(const QJsonObject& jsonObject)
+{
+    if (jsonObject.empty())
+    {
+        return false;
+    }
+
+    PlayerModel* player = new PlayerModel();
+    if (player->loadPlayerDataFromJsonObject(jsonObject))
+    {
+        m_playerMap.insert(player->getPlayerUID(), player);
+        return true;
+    }
+    else
+    {
+        delete player;
+        return false;
+    }
 }
 
 QDebug operator<<(QDebug debug, const PlayerListModel& data)
 {
-    for (auto player : data.m_playerList)
+    for (auto player : data.m_playerMap.values())
     {
         debug << *player << "\n";
     }

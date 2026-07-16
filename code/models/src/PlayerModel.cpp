@@ -35,56 +35,49 @@ bool PlayerModel::loadPlayerDataFromJsonObject(const QJsonObject& jsonObject)
 
     if (!jsonObject.contains(PLAYER_UID_KEY) || !jsonObject.contains(PLAYER_NICK_NAME_KEY))
     {
+        qDebug() << "PlayerPalData donot contains acquired keys";
         return false;
     }
 
-    m_playerUID      = jsonObject["player_uid"].toString();
-    m_playerNickName = jsonObject["nickname"].toString();
-
-    return true;
-}
-
-bool PlayerModel::loadPalListDataFromJsonObject(const QJsonObject& jsonObject)
-{
-    if (jsonObject.empty())
+    if (!m_playerUID.isEmpty() && m_playerUID != jsonObject[PLAYER_UID_KEY].toString())
     {
         return false;
     }
 
-    if (!jsonObject.contains(PLAYER_UID_KEY) || !jsonObject.contains(PAL_LIST_KEY))
-    {
-        qDebug() << "PlayerPalData not contains player_uid or pal_list";
+    m_playerUID      = jsonObject[PLAYER_UID_KEY].toString();
+    m_playerNickName = jsonObject[PLAYER_NICK_NAME_KEY].toString();
 
-        return false;
-    }
-
-    if (jsonObject[PLAYER_UID_KEY] != m_playerUID)
+    if (jsonObject.contains(PAL_LIST_KEY))
     {
-        return false;
-    }
+        // 如果有pals列表，直接读取
 
-    for (auto pal : m_palList)
-    {
-        delete pal;
-    }
-    m_palList.clear();
-
-    QJsonArray palList = jsonObject[PAL_LIST_KEY].toArray();
-    for (auto palDataJsonValue : palList)
-    {
-        QJsonObject palDataJsonObject  = palDataJsonValue.toObject();
-        PlayerPalModel* playerPalModel = new PlayerPalModel();
-        if (playerPalModel->loadPalModel(palDataJsonObject))
+        for (auto pal : m_palList)
         {
-            m_palList.append(playerPalModel);
+            delete pal;
         }
-        else
-        {
-            delete playerPalModel;
-        }
-    }
+        m_palList.clear();
 
-    m_palDataLoaded = true;
+        QJsonArray palList = jsonObject[PAL_LIST_KEY].toArray();
+        for (auto palDataJsonValue : palList)
+        {
+            QJsonObject palDataJsonObject  = palDataJsonValue.toObject();
+            PlayerPalModel* playerPalModel = new PlayerPalModel();
+            if (playerPalModel->loadPalModel(palDataJsonObject))
+            {
+                m_palList.append(playerPalModel);
+            }
+            else
+            {
+                delete playerPalModel;
+            }
+        }
+
+        m_palDataLoaded = true;
+    }
+    else
+    {
+        m_palDataLoaded = false;
+    }
 
     return true;
 }
