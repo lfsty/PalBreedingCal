@@ -5,6 +5,9 @@
 #include <QFileDialog>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QNetworkRequest>
 #include <QtConcurrent>
 
 #include <PlayerManager.h>
@@ -51,18 +54,7 @@ void PlayerManagerView::onClickLoadFromFile()
                               }
 
                               QJsonDocument jsonDoc = QJsonDocument::fromJson(file.readAll());
-                              if (jsonDoc.isArray())
-                              {
-                                  PlayerManager::getInstance()->LoadPlayerData(jsonDoc.array());
-                              }
-                              else if (jsonDoc.isObject())
-                              {
-                                  PlayerManager::getInstance()->LoadPlayerData(jsonDoc.object());
-                              }
-                              else
-                              {
-                                  qDebug() << "Invalid JSON format";
-                              }
+                              updatePlayerData(jsonDoc);
                           }
 
                           QTimer::singleShot(0, this, &PlayerManagerView::updatePlayerList);
@@ -71,7 +63,69 @@ void PlayerManagerView::onClickLoadFromFile()
 
 void PlayerManagerView::onClickLoadFromNetWork()
 {
-    qDebug() << "NOT SUPPORT YET";
+    QString url = ui->lineEdit_networkAddress->text();
+    if (url.isEmpty())
+    {
+        return;
+    }
+
+    QtConcurrent::run([this, url]()
+                      {
+                          constexpr const char* api = "/api/player";
+
+                          QNetworkAccessManager manager;
+
+                          {
+                              // 加载玩家列表
+                              QNetworkRequest playerListRequest(QString("http://%1%2").arg(url).arg(api));
+                              QNetworkReply* playerListreply = manager.get(playerListRequest);
+                              QEventLoop loop;
+                              QObject::connect(playerListreply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
+                              loop.exec();
+
+                              // 处理响应结果
+                              if (playerListreply->error() == QNetworkReply::NoError)
+                              {
+                                  QByteArray responseData = playerListreply->readAll();
+                                  QJsonDocument doc       = QJsonDocument::fromJson(responseData);
+                                  updatePlayerData(doc);
+                                  playerListreply->deleteLater();
+                              }
+                              else
+                              {
+                                  qDebug() << "请求失败，错误信息：" << playerListreply->errorString();
+                                  playerListreply->deleteLater();
+                                  return;
+                              }
+                          }
+
+                          // 获取玩家数据
+                          for (auto player : PlayerManager::getInstance()->getPlayerMap().values())
+                          {
+                              QNetworkRequest playerDataRequest(QString("http://%1%2/%3").arg(url).arg(api).arg(player->getPlayerUID()));
+                              QNetworkReply* playerDatareply = manager.get(playerDataRequest);
+                              QEventLoop loop;
+                              connect(playerDatareply, &QNetworkReply::finished, this, [this, playerDatareply, player, &loop]()
+                                      {
+                                          if (playerDatareply->error() == QNetworkReply::NoError)
+                                          {
+                                              QByteArray responseData = playerDatareply->readAll();
+                                              QJsonDocument doc       = QJsonDocument::fromJson(responseData);
+                                              updatePlayerData(doc);
+                                          }
+                                          else
+                                          {
+                                              qDebug() << "请求失败，错误信息：" << playerDatareply->errorString();
+                                          }
+                                          loop.quit();
+
+                                          playerDatareply->deleteLater();
+                                      });
+                              loop.exec();
+                          }
+
+                          QTimer::singleShot(0, this, &PlayerManagerView::updatePlayerList);
+                      });
 }
 
 void PlayerManagerView::updatePlayerList()
@@ -100,4 +154,20 @@ void PlayerManagerView::updatePlayerList()
     }
 
     ui->playerViewLayout->addStretch();
+}
+
+void PlayerManagerView::updatePlayerData(const QJsonDocument& doc)
+{
+    if (doc.isArray())
+    {
+        PlayerManager::getInstance()->LoadPlayerData(doc.array());
+    }
+    else if (doc.isObject())
+    {
+        PlayerManager::getInstance()->LoadPlayerData(doc.object());
+    }
+    else
+    {
+        qDebug() << "Invalid JSON format";
+    }
 }

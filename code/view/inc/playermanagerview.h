@@ -2,6 +2,7 @@
 #define PLAYERMANAGERVIEW_H
 
 #include <QDialog>
+#include <QJsonDocument>
 
 namespace Ui
 {
@@ -20,6 +21,9 @@ protected slots:
     void onClickLoadFromFile();
     void onClickLoadFromNetWork();
     void updatePlayerList();
+
+private:
+    void updatePlayerData(const QJsonDocument& doc);
 
 private:
     Ui::PlayerManagerView* ui;

@@ -25,6 +25,13 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent),
 
     connect(PalManager::getInstance(), &PalManager::dataLoaded, this, &MainWindow::updateComboBox);
     connect(PlayerManager::getInstance(), &PlayerManager::CurrentPlayerChanged, PalManager::getInstance(), &PalManager::updataOwnedPal);
+    connect(PlayerManager::getInstance(), &PlayerManager::CurrentPlayerChanged, this, [=](const PlayerModel* player)
+            {
+                if (player)
+                {
+                    setWindowTitle(QString("PalBreedingCal - %1").arg(player->getPlayerNickName()));
+                }
+            });
 
     connect(this, &MainWindow::requestUpdateBreedingView, ui->breedingViewFrame, &BreedingListView::updateBreedingView);
 
