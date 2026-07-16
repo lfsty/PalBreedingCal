@@ -42,7 +42,7 @@ void PlayerManager::setCurrentPlayer(const QString& playerUID)
 
 bool PlayerManager::LoadPlayerData(const QJsonArray& jsonArray)
 {
-    for (auto& jsonPlayer : jsonArray)
+    for (auto jsonPlayer : jsonArray)
     {
         if (!LoadPlayerData(jsonPlayer.toObject()))
         {
