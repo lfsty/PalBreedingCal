@@ -42,12 +42,14 @@ void PalManager::requestLoadDB(const QString& palDBPath, const QString& breeding
                           bool ret = loadPalDB(palDBPath);
                           if (!ret)
                           {
+                              qDebug() << "load PalDB failed: " << palDBPath;
                               return;
                           }
 
                           ret = loadBreedingDB(breedingDbPath);
                           if (!ret)
                           {
+                              qDebug() << "load BreedingDB failed: " << breedingDbPath;
                               return;
                           }
 
