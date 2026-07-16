@@ -10,6 +10,9 @@ set(SOURCES_LIST
     ${CMAKE_CURRENT_LIST_DIR}/src/BreedingListView.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/BreedingModel.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/BreedingView.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/PlayerModel.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/PlayerPalModel.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/PlayerListModel.cpp
 )
 
 set(HEADERS_LIST
@@ -19,6 +22,9 @@ set(HEADERS_LIST
     ${CMAKE_CURRENT_LIST_DIR}/inc/BreedingListView.h
     ${CMAKE_CURRENT_LIST_DIR}/inc/BreedingModel.h
     ${CMAKE_CURRENT_LIST_DIR}/inc/BreedingView.h
+    ${CMAKE_CURRENT_LIST_DIR}/inc/PlayerModel.h
+    ${CMAKE_CURRENT_LIST_DIR}/inc/PlayerPalModel.h
+    ${CMAKE_CURRENT_LIST_DIR}/inc/PlayerListModel.h
 )
 
 set(RESOURCES_LIST
@@ -60,3 +66,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 set_target_properties(${PROJECT_NAME} PROPERTIES
     AUTOUIC_SEARCH_PATHS "${CMAKE_CURRENT_SOURCE_DIR}/ui"
 )
+
+if(BUILD_TESTS)
+    add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/tests)
+endif()

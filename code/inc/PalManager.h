@@ -22,6 +22,7 @@ public:
     void requestLoadDB(const QString& palDBPath, const QString& breedingDbPath);
     const QSet<BreedingModel*>& getBreedingList() { return m_breedingList; }
     const QStringList& getPalLocalNameList() { return m_palLocalNameList; }
+    const PalModel* getPalModel(const QString& internalPalName) const;
 
 public:
     QSet<BreedingModel*> getBreedingListByFilter(const QString& parent1Name, const QString& parent2Name, const QString& childName) const;

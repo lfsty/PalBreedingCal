@@ -58,6 +58,15 @@ void PalManager::requestLoadDB(const QString& palDBPath, const QString& breeding
                       });
 }
 
+const PalModel* PalManager::getPalModel(const QString& internalPalName) const
+{
+    if (!m_palMap.contains(internalPalName))
+    {
+        return nullptr;
+    }
+    return m_palMap[internalPalName];
+}
+
 bool PalManager::loadPalDB(const QString& palDBPath)
 {
     // 加载db.json
