@@ -8,7 +8,7 @@ set(SOURCES_LIST
     ${CMAKE_CURRENT_LIST_DIR}/src/BreedingModel.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/PlayerModel.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/PlayerPalModel.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/PlayerListModel.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/PlayerManager.cpp
 )
 
 set(HEADERS_LIST
@@ -17,7 +17,7 @@ set(HEADERS_LIST
     ${CMAKE_CURRENT_LIST_DIR}/inc/BreedingModel.h
     ${CMAKE_CURRENT_LIST_DIR}/inc/PlayerModel.h
     ${CMAKE_CURRENT_LIST_DIR}/inc/PlayerPalModel.h
-    ${CMAKE_CURRENT_LIST_DIR}/inc/PlayerListModel.h
+    ${CMAKE_CURRENT_LIST_DIR}/inc/PlayerManager.h
 )
 
 add_library(${MODULE_NAME} STATIC ${SOURCES_LIST})

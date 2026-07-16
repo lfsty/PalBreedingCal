@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 
 #include <QCompleter>
+#include <QFileDialog>
 #include <QStandardItemModel>
 #include <QStringListModel>
 #include <QtConcurrent>
@@ -9,6 +10,7 @@
 #include <BreedingListView.h>
 #include <PalManager.h>
 #include <PalModel.h>
+#include <playermanagerview.h>
 
 #include <QDebug>
 
@@ -26,6 +28,8 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent),
     connect(ui->parent1Combo, &QComboBox::currentTextChanged, this, &MainWindow::updateBreedingList);
     connect(ui->parent2Combo, &QComboBox::currentTextChanged, this, &MainWindow::updateBreedingList);
     connect(ui->childCombo, &QComboBox::currentTextChanged, this, &MainWindow::updateBreedingList);
+
+    connect(ui->action_playerManager, &QAction::triggered, this, &MainWindow::showPlayerManagerDialog);
 
     PalManager::getInstance()->requestLoadDB(QStringLiteral(":/db/db.json"), QStringLiteral(":/db/breeding.json"));
 }
@@ -62,6 +66,12 @@ void MainWindow::updateComboBox()
     ui->childCombo->setCurrentIndex(0);
 
     updateBreedingList();
+}
+
+void MainWindow::showPlayerManagerDialog()
+{
+    PlayerManagerView dlg(this);
+    dlg.exec();
 }
 
 void MainWindow::updateBreedingList()

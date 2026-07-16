@@ -1,14 +1,20 @@
-#include "PlayerListModel.h"
+#include "PlayerManager.h"
 
 #include <PlayerModel.h>
 
 #include <QDebug>
 
-PlayerListModel::PlayerListModel()
+PlayerManager* PlayerManager::getInstance()
+{
+    static PlayerManager instance;
+    return &instance;
+}
+
+PlayerManager::PlayerManager()
 {
 }
 
-PlayerListModel::~PlayerListModel()
+PlayerManager::~PlayerManager()
 {
     for (auto player : m_playerMap.values())
     {
@@ -17,7 +23,24 @@ PlayerListModel::~PlayerListModel()
     m_playerMap.clear();
 }
 
-bool PlayerListModel::LoadPlayerData(const QJsonArray& jsonArray)
+void PlayerManager::setCurrentPlayer(const QString& playerUID)
+{
+    PlayerModel* player = m_playerMap.value(playerUID);
+    if (player)
+    {
+        if (player != m_currentApplyPlayer)
+        {
+            m_currentApplyPlayer = player;
+            emit CurrentPlayerChanged();
+        }
+    }
+    else
+    {
+        m_currentApplyPlayer = nullptr;
+    }
+}
+
+bool PlayerManager::LoadPlayerData(const QJsonArray& jsonArray)
 {
     for (auto& jsonPlayer : jsonArray)
     {
@@ -30,7 +53,7 @@ bool PlayerListModel::LoadPlayerData(const QJsonArray& jsonArray)
     return !m_playerMap.empty();
 }
 
-bool PlayerListModel::LoadPlayerData(const QJsonObject& jsonObject)
+bool PlayerManager::LoadPlayerData(const QJsonObject& jsonObject)
 {
     if (jsonObject.empty())
     {
@@ -51,7 +74,7 @@ bool PlayerListModel::LoadPlayerData(const QJsonObject& jsonObject)
     return CreateNewPlayer(jsonObject);
 }
 
-bool PlayerListModel::CreateNewPlayer(const QJsonObject& jsonObject)
+bool PlayerManager::CreateNewPlayer(const QJsonObject& jsonObject)
 {
     if (jsonObject.empty())
     {
@@ -71,7 +94,7 @@ bool PlayerListModel::CreateNewPlayer(const QJsonObject& jsonObject)
     }
 }
 
-QDebug operator<<(QDebug debug, const PlayerListModel& data)
+QDebug operator<<(QDebug debug, const PlayerManager& data)
 {
     for (auto player : data.m_playerMap.values())
     {

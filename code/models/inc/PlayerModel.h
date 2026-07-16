@@ -20,6 +20,9 @@ public:
     const QString& getPlayerNickName() const { return m_playerNickName; }
     const bool isPalDataLoaded() const { return m_palDataLoaded; }
 
+    void apply();
+    bool isApply();
+
 private:
     QString m_playerUID      = "";
     QString m_playerNickName = "";

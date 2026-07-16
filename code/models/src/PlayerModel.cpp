@@ -2,6 +2,7 @@
 
 #include <QJsonArray>
 
+#include <PlayerManager.h>
 #include <PlayerPalModel.h>
 
 #include <QDebug>
@@ -80,6 +81,16 @@ bool PlayerModel::loadPlayerDataFromJsonObject(const QJsonObject& jsonObject)
     }
 
     return true;
+}
+
+void PlayerModel::apply()
+{
+    PlayerManager::getInstance()->setCurrentPlayer(m_playerUID);
+}
+
+bool PlayerModel::isApply()
+{
+    return this == PlayerManager::getInstance()->getCurrentPlayer();
 }
 
 QDebug operator<<(QDebug debug, const PlayerModel& data)
