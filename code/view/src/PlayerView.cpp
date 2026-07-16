@@ -24,7 +24,10 @@ PlayerView::PlayerView(QWidget* parent) : QWidget(parent)
     layout()->addWidget(m_button);
 
     connect(m_button, &QPushButton::clicked, this, &PlayerView::applyButtonClicked);
-    connect(PlayerManager::getInstance(), &PlayerManager::CurrentPlayerChanged, this, &PlayerView::updateView);
+    connect(PlayerManager::getInstance(), &PlayerManager::CurrentPlayerChanged, this, [=](const PlayerModel*)
+            {
+                updateView();
+            });
 }
 
 PlayerView::~PlayerView()

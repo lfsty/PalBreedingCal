@@ -36,7 +36,7 @@ private:
     PlayerModel* m_currentApplyPlayer = nullptr;
 
 signals:
-    void CurrentPlayerChanged();
+    void CurrentPlayerChanged(const PlayerModel* currentPlayerModel);
 
 public:
     friend QDebug operator<<(QDebug debug, const PlayerManager& data);

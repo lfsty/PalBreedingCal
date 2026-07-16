@@ -15,6 +15,7 @@ public:
     const QString& getInternalName() const { return m_internalName; }
     const QString& getLocalizedName() const { return m_localizedName; }
     const bool isOwned() const { return m_owned; }
+    void setOwned(bool owned) { m_owned = owned; }
 
 protected:
     QString m_internalName;

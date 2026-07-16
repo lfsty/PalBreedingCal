@@ -31,7 +31,7 @@ void PlayerManager::setCurrentPlayer(const QString& playerUID)
         if (player != m_currentApplyPlayer)
         {
             m_currentApplyPlayer = player;
-            emit CurrentPlayerChanged();
+            emit CurrentPlayerChanged(m_currentApplyPlayer);
         }
     }
     else

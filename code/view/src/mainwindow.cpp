@@ -10,6 +10,8 @@
 #include <BreedingListView.h>
 #include <PalManager.h>
 #include <PalModel.h>
+#include <PlayerManager.h>
+#include <PlayerModel.h>
 #include <playermanagerview.h>
 
 #include <QDebug>
@@ -22,6 +24,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent),
     ui->setupUi(this);
 
     connect(PalManager::getInstance(), &PalManager::dataLoaded, this, &MainWindow::updateComboBox);
+    connect(PlayerManager::getInstance(), &PlayerManager::CurrentPlayerChanged, PalManager::getInstance(), &PalManager::updataOwnedPal);
 
     connect(this, &MainWindow::requestUpdateBreedingView, ui->breedingViewFrame, &BreedingListView::updateBreedingView);
 

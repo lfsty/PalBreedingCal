@@ -57,6 +57,7 @@ bool PlayerModel::loadPlayerDataFromJsonObject(const QJsonObject& jsonObject)
             delete pal;
         }
         m_palList.clear();
+        m_ownedPalInterNameSet.clear();
 
         QJsonArray palList = jsonObject[PAL_LIST_KEY].toArray();
         for (auto palDataJsonValue : palList)
@@ -66,6 +67,7 @@ bool PlayerModel::loadPlayerDataFromJsonObject(const QJsonObject& jsonObject)
             if (playerPalModel->loadPalModel(palDataJsonObject))
             {
                 m_palList.append(playerPalModel);
+                m_ownedPalInterNameSet.insert(playerPalModel->getInternalName());
             }
             else
             {

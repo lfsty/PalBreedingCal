@@ -7,6 +7,8 @@
 
 #include <BreedingModel.h>
 
+class PlayerModel;
+
 class PalManager : public QObject
 {
     Q_OBJECT
@@ -23,6 +25,7 @@ public:
     const QSet<BreedingModel*>& getBreedingList() { return m_breedingList; }
     const QStringList& getPalLocalNameList() { return m_palLocalNameList; }
     const PalModel* getPalModel(const QString& internalPalName) const;
+    void updataOwnedPal(const PlayerModel* playerModel);
 
 public:
     QSet<BreedingModel*> getBreedingListByFilter(const QString& parent1Name, const QString& parent2Name, const QString& childName) const;
@@ -36,6 +39,7 @@ private:
     void buildIndexes();
 
 private:
+    // <interName, palModel>
     QHash<QString, PalModel*> m_palMap;
     QSet<BreedingModel*> m_breedingList;
     QStringList m_palLocalNameList;

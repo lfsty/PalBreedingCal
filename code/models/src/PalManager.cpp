@@ -7,6 +7,7 @@
 #include <QtConcurrent>
 
 #include <PalModel.h>
+#include <PlayerModel.h>
 
 #include <QDebug>
 
@@ -67,6 +68,19 @@ const PalModel* PalManager::getPalModel(const QString& internalPalName) const
         return nullptr;
     }
     return m_palMap[internalPalName];
+}
+
+void PalManager::updataOwnedPal(const PlayerModel* playerModel)
+{
+    if (!playerModel)
+    {
+        return;
+    }
+
+    for (auto iter = m_palMap.begin(); iter != m_palMap.end(); iter++)
+    {
+        iter.value()->setOwned(playerModel->isOwnPal(iter.key()));
+    }
 }
 
 bool PalManager::loadPalDB(const QString& palDBPath)
