@@ -43,6 +43,7 @@ jobs:
         run: cmake --build build --config ${{env.BUILD_TYPE}}
 
       - name: Package Application (Windows)
+        if: github.ref_type == 'tag'
         shell: pwsh
         env: 
           TAG_NAME: ${{ github.ref_name }}

@@ -7,6 +7,7 @@
 #include <QtConcurrent>
 
 #include <PalModel.h>
+#include <PlayerModel.h>
 
 #include <QDebug>
 
@@ -42,12 +43,14 @@ void PalManager::requestLoadDB(const QString& palDBPath, const QString& breeding
                           bool ret = loadPalDB(palDBPath);
                           if (!ret)
                           {
+                              qDebug() << "load PalDB failed: " << palDBPath;
                               return;
                           }
 
                           ret = loadBreedingDB(breedingDbPath);
                           if (!ret)
                           {
+                              qDebug() << "load BreedingDB failed: " << breedingDbPath;
                               return;
                           }
 
@@ -56,6 +59,28 @@ void PalManager::requestLoadDB(const QString& palDBPath, const QString& breeding
 
                           emit dataLoaded();
                       });
+}
+
+const PalModel* PalManager::getPalModel(const QString& internalPalName) const
+{
+    if (!m_palMap.contains(internalPalName))
+    {
+        return nullptr;
+    }
+    return m_palMap[internalPalName];
+}
+
+void PalManager::updataOwnedPal(const PlayerModel* playerModel)
+{
+    if (!playerModel)
+    {
+        return;
+    }
+
+    for (auto iter = m_palMap.begin(); iter != m_palMap.end(); iter++)
+    {
+        iter.value()->setOwned(playerModel->isOwnPal(iter.key()));
+    }
 }
 
 bool PalManager::loadPalDB(const QString& palDBPath)

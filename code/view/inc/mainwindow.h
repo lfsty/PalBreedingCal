@@ -22,6 +22,7 @@ protected slots:
     // 跟新接口，更新数据和刷新界面
     void updateBreedingList();
     void updateComboBox();
+    void showPlayerManagerDialog();
 
 signals:
     // 内部信号，用于更新界面

@@ -13,4 +13,7 @@
 
 ## 原始数据来源：
 
-https://github.com/tylercamp/palcalc
+帕鲁配种表： https://github.com/tylercamp/palcalc
+
+玩家数据解析：https://github.com/zaigie/palworld-server-tool
+
