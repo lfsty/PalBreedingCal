@@ -5,6 +5,7 @@
 #include <QFileDialog>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QMessageBox>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QNetworkRequest>
@@ -93,7 +94,11 @@ void PlayerManagerView::onClickLoadFromNetWork()
                               }
                               else
                               {
-                                  qDebug() << "请求失败，错误信息：" << playerListreply->errorString();
+                                  QString errorString = playerListreply->errorString();
+                                  QMetaObject::invokeMethod(qApp, [errorString]()
+                                                            {
+                                                                QMessageBox::critical(nullptr, "请求失败", QStringLiteral("获取玩家列表失败: %1").arg(errorString));
+                                                            });
                                   playerListreply->deleteLater();
                                   return;
                               }
@@ -115,7 +120,11 @@ void PlayerManagerView::onClickLoadFromNetWork()
                                           }
                                           else
                                           {
-                                              qDebug() << "请求失败，错误信息：" << playerDatareply->errorString();
+                                              QString errorString = playerDatareply->errorString();
+                                              QMetaObject::invokeMethod(qApp, [errorString]()
+                                                                        {
+                                                                            QMessageBox::critical(nullptr, "请求失败", QStringLiteral("获取玩家信息失败: %1").arg(errorString));
+                                                                        });
                                           }
                                           loop.quit();
 
