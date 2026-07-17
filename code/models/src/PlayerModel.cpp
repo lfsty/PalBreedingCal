@@ -20,11 +20,7 @@ PlayerModel::PlayerModel()
 
 PlayerModel::~PlayerModel()
 {
-    for (auto pal : m_palList)
-    {
-        delete pal;
-    }
-    m_palList.clear();
+    clearAllPalData();
 }
 
 bool PlayerModel::loadPlayerDataFromJsonObject(const QJsonObject& jsonObject)
@@ -51,13 +47,7 @@ bool PlayerModel::loadPlayerDataFromJsonObject(const QJsonObject& jsonObject)
     if (jsonObject.contains(PAL_LIST_KEY))
     {
         // 如果有pals列表，直接读取
-
-        for (auto pal : m_palList)
-        {
-            delete pal;
-        }
-        m_palList.clear();
-        m_ownedPalInterNameSet.clear();
+        clearAllPalData();
 
         QJsonArray palList = jsonObject[PAL_LIST_KEY].toArray();
         for (auto palDataJsonValue : palList)
@@ -67,7 +57,16 @@ bool PlayerModel::loadPlayerDataFromJsonObject(const QJsonObject& jsonObject)
             if (playerPalModel->loadPalModel(palDataJsonObject))
             {
                 m_palList.append(playerPalModel);
-                m_ownedPalInterNameSet.insert(playerPalModel->getInternalName());
+                const QString& palInterName = playerPalModel->getInternalName();
+                m_ownedPalInterNameSet.insert(palInterName);
+                if (m_ownedPalGenderMap.contains(palInterName))
+                {
+                    m_ownedPalGenderMap[palInterName] |= playerPalModel->getGender();
+                }
+                else
+                {
+                    m_ownedPalGenderMap[palInterName] = playerPalModel->getGender();
+                }
             }
             else
             {
@@ -85,6 +84,18 @@ bool PlayerModel::loadPlayerDataFromJsonObject(const QJsonObject& jsonObject)
     return true;
 }
 
+const Genders PlayerModel::getOwnedPalGendersByInterName(const QString& palInterName) const
+{
+    if (m_ownedPalGenderMap.contains(palInterName))
+    {
+        return m_ownedPalGenderMap.value(palInterName);
+    }
+    else
+    {
+        return Gender::NOTSET;
+    }
+}
+
 void PlayerModel::apply()
 {
     PlayerManager::getInstance()->setCurrentPlayer(m_playerUID);
@@ -93,6 +104,17 @@ void PlayerModel::apply()
 bool PlayerModel::isApply()
 {
     return this == PlayerManager::getInstance()->getCurrentPlayer();
+}
+
+void PlayerModel::clearAllPalData()
+{
+    for (auto pal : m_palList)
+    {
+        delete pal;
+    }
+    m_palList.clear();
+    m_ownedPalInterNameSet.clear();
+    m_ownedPalGenderMap.clear();
 }
 
 QDebug operator<<(QDebug debug, const PlayerModel& data)

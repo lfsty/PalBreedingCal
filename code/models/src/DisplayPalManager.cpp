@@ -79,7 +79,9 @@ void DisplayPalManager::updataOwnedPal(const PlayerModel* playerModel)
 
     for (auto iter = m_palMap.begin(); iter != m_palMap.end(); iter++)
     {
-        iter.value()->setOwned(playerModel->isOwnPal(iter.key()));
+        const QString& internalPalName = iter.key();
+        iter.value()->setOwned(playerModel->isOwnPalByInterName(internalPalName));
+        iter.value()->setOwnedGender(playerModel->getOwnedPalGendersByInterName(internalPalName));
     }
 }
 

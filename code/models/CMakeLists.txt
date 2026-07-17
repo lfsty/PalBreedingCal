@@ -20,6 +20,7 @@ set(HEADERS_LIST
     ${CMAKE_CURRENT_LIST_DIR}/inc/PlayerPalModel.h
     ${CMAKE_CURRENT_LIST_DIR}/inc/PlayerManager.h
     ${CMAKE_CURRENT_LIST_DIR}/inc/DisplayPalModel.h
+    ${CMAKE_CURRENT_LIST_DIR}/inc/PalDef.h
 )
 
 add_library(${MODULE_NAME} STATIC ${SOURCES_LIST})

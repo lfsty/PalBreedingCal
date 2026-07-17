@@ -81,13 +81,13 @@ QDebug operator<<(QDebug debug, const PlayerPalModel& data)
     debug.nospace() << "PlayerPalModel(" << data.getLocalizedName() << ", ";
     switch (data.m_gender)
     {
-    case PlayerPalModel::Gender::Male:
+    case Gender::Male:
         debug.nospace() << "Male" << ", ";
         break;
-    case PlayerPalModel::Gender::Female:
+    case Gender::Female:
         debug.nospace() << "Female" << ", ";
         break;
-    case PlayerPalModel::Gender::NOTSET:
+    case Gender::NOTSET:
         debug.nospace() << "Unknown" << ", ";
         break;
     }
