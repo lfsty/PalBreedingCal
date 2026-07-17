@@ -6,7 +6,6 @@
 
 #include <BreedingModel.h>
 #include <BreedingView.h>
-#include <PalModel.h>
 
 #include <QDebug>
 

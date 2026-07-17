@@ -8,23 +8,24 @@
 #include <BreedingModel.h>
 
 class PlayerModel;
+class DisplayPalModel;
 
-class PalManager : public QObject
+class DisplayPalManager : public QObject
 {
     Q_OBJECT
 
 public:
-    static PalManager* getInstance();
+    static DisplayPalManager* getInstance();
 
 private:
-    PalManager();
-    ~PalManager();
+    DisplayPalManager();
+    ~DisplayPalManager();
 
 public:
     void requestLoadDB(const QString& palDBPath, const QString& breedingDbPath);
     const QSet<BreedingModel*>& getBreedingList() { return m_breedingList; }
     const QStringList& getPalLocalNameList() { return m_palLocalNameList; }
-    const PalModel* getPalModel(const QString& internalPalName) const;
+    const DisplayPalModel* getDisplayPalModel(const QString& internalPalName) const;
     void updataOwnedPal(const PlayerModel* playerModel);
 
 public:
@@ -40,7 +41,7 @@ private:
 
 private:
     // <interName, palModel>
-    QHash<QString, PalModel*> m_palMap;
+    QHash<QString, DisplayPalModel*> m_palMap;
     QSet<BreedingModel*> m_breedingList;
     QStringList m_palLocalNameList;
 

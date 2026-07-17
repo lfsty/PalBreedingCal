@@ -1,6 +1,6 @@
 #pragma once
 
-class PalModel;
+class DisplayPalModel;
 class QDebug;
 
 class BreedingModel
@@ -10,11 +10,12 @@ public:
     ~BreedingModel() = default;
 
 public:
-    PalModel* parent1 = nullptr;
-    PalModel* parent2 = nullptr;
-    PalModel* child   = nullptr;
+    DisplayPalModel* parent1 = nullptr;
+    DisplayPalModel* parent2 = nullptr;
+    DisplayPalModel* child   = nullptr;
 
     BreedingModel copy(bool swapParent) const;
 
+public:
     friend QDebug operator<<(QDebug debug, const BreedingModel& data);
 };

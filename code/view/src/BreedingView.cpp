@@ -4,7 +4,8 @@
 #include <QPainter>
 
 #include <BreedingModel.h>
-#include <PalModel.h>
+#include <DisplayPalModel.h>
+#include <PalDef.h>
 
 BreedingView::BreedingView(const BreedingModel& model, QWidget* parent) : QWidget(parent)
 {
@@ -59,7 +60,7 @@ void BreedingView::paintEvent(QPaintEvent* event)
     painter.drawText(paintPlusRect.translated(palContentWidth + palContentHeight, 0), Qt::AlignCenter, "=");
 }
 
-void BreedingView::paintSinglePal(QPainter* painter, const QRect& rect, const PalModel* pal) const
+void BreedingView::paintSinglePal(QPainter* painter, const QRect& rect, const DisplayPalModel* pal) const
 {
     if (!pal)
     {
@@ -71,18 +72,49 @@ void BreedingView::paintSinglePal(QPainter* painter, const QRect& rect, const Pa
     QRect textRect = painter->boundingRect(rect, Qt::AlignCenter, pal->getLocalizedName());
     painter->drawText(textRect, Qt::AlignCenter, pal->getLocalizedName());
 
-    constexpr int ownedRadius = 5;
-    QRect ownedRect           = QRect(textRect.left() - 2 * ownedRadius, rect.top(), ownedRadius, rect.height());
+    QRect ownedStatusRect = QRect(textRect.left(), rect.top(), 0, rect.height());
+
     if (pal->isOwned())
     {
-        painter->setBrush(Qt::green);
+        // 绘制性别符号
+        Genders gender = pal->getOwnedGender();
+
+        QFontMetrics fm  = painter->fontMetrics();
+        QRect symbolRect = fm.boundingRect(QString::fromUtf8("\u2642"));
+        ownedStatusRect.setWidth(symbolRect.width());
+
+        if (gender & Gender::Female)
+        {
+            ownedStatusRect.translate(-ownedStatusRect.width(), 0);
+            painter->setPen(QColor("#FF69B4"));
+            painter->drawText(ownedStatusRect, Qt::AlignCenter, QString::fromUtf8("\u2640"));
+        }
+
+        if (gender & Gender::Male)
+        {
+            ownedStatusRect.translate(-ownedStatusRect.width(), 0);
+            painter->setPen(QColor("#1E90FF"));
+            painter->drawText(ownedStatusRect, Qt::AlignCenter, QString::fromUtf8("\u2642"));
+        }
     }
-    else
+
     {
-        painter->setBrush(Qt::red);
+        // 绘制是否拥有
+        constexpr int ownedRadius = 5;
+        ownedStatusRect.setWidth(ownedRadius);
+        ownedStatusRect.translate(-ownedStatusRect.width() * 2, 0);
+
+        if (pal->isOwned())
+        {
+            painter->setBrush(Qt::green);
+        }
+        else
+        {
+            painter->setBrush(Qt::red);
+        }
+        painter->setPen(Qt::NoPen);
+        painter->drawEllipse(ownedStatusRect.center(), ownedRadius, ownedRadius);
     }
-    painter->setPen(Qt::NoPen);
-    painter->drawEllipse(ownedRect.center(), ownedRadius, ownedRadius);
 
     painter->restore();
 }

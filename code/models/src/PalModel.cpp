@@ -12,15 +12,8 @@ PalModel::~PalModel()
 {
 }
 
-bool PalModel::loadPalModel(const QJsonObject& jsonObject)
+QDebug operator<<(QDebug debug, const PalModel& data)
 {
-    if (!jsonObject.contains("InternalName") || !jsonObject.contains("LocalizedNames"))
-    {
-        return false;
-    }
-
-    m_internalName  = jsonObject["InternalName"].toString();
-    m_localizedName = jsonObject["LocalizedNames"]["zh-Hans"].toString();
-
-    return true;
+    debug.nospace() << QStringLiteral("PalModel( InternalName: %1, LocalizedName: %2 )").arg(data.m_internalName).arg(data.m_localizedName);
+    return debug;
 }

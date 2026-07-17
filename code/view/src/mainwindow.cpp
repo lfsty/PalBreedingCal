@@ -8,8 +8,8 @@
 #include <QtConcurrent>
 
 #include <BreedingListView.h>
-#include <PalManager.h>
-#include <PalModel.h>
+#include <DisplayPalManager.h>
+#include <DisplayPalModel.h>
 #include <PlayerManager.h>
 #include <PlayerModel.h>
 #include <playermanagerview.h>
@@ -23,8 +23,8 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent),
 
     ui->setupUi(this);
 
-    connect(PalManager::getInstance(), &PalManager::dataLoaded, this, &MainWindow::updateComboBox);
-    connect(PlayerManager::getInstance(), &PlayerManager::CurrentPlayerChanged, PalManager::getInstance(), &PalManager::updataOwnedPal);
+    connect(DisplayPalManager::getInstance(), &DisplayPalManager::dataLoaded, this, &MainWindow::updateComboBox);
+    connect(PlayerManager::getInstance(), &PlayerManager::CurrentPlayerChanged, DisplayPalManager::getInstance(), &DisplayPalManager::updataOwnedPal);
     connect(PlayerManager::getInstance(), &PlayerManager::CurrentPlayerChanged, this, [=](const PlayerModel* player)
             {
                 if (player)
@@ -41,7 +41,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent),
 
     connect(ui->action_playerManager, &QAction::triggered, this, &MainWindow::showPlayerManagerDialog);
 
-    PalManager::getInstance()->requestLoadDB(QStringLiteral(":/db/db.json"), QStringLiteral(":/db/breeding.json"));
+    DisplayPalManager::getInstance()->requestLoadDB(QStringLiteral(":/db/db.json"), QStringLiteral(":/db/breeding.json"));
 }
 
 MainWindow::~MainWindow()
@@ -56,7 +56,7 @@ void MainWindow::updateComboBox()
     QSignalBlocker blocker3(ui->childCombo);
 
     QStringList m_palNames = { "" };
-    m_palNames.append(PalManager::getInstance()->getPalLocalNameList());
+    m_palNames.append(DisplayPalManager::getInstance()->getPalLocalNameList());
 
     QCompleter* _parent1Completer = new QCompleter(m_palNames, this);
     QCompleter* _parent2Completer = new QCompleter(m_palNames, this);
@@ -101,7 +101,7 @@ void MainWindow::updateBreedingList()
                           if (hasParent1 || hasParent2 || hasChild)
                           {
                               // 使用索引一次性完成过滤
-                              QSet<BreedingModel*> breedingSet = PalManager::getInstance()->getBreedingListByFilter(parent1Name, parent2Name, childName);
+                              QSet<BreedingModel*> breedingSet = DisplayPalManager::getInstance()->getBreedingListByFilter(parent1Name, parent2Name, childName);
 
                               breedingList.reserve(breedingSet.size());
 
@@ -110,11 +110,11 @@ void MainWindow::updateBreedingList()
                                   bool needSwap = false;
                                   if (hasParent1)
                                   {
-                                      needSwap = (breedData->parent2->getLocalizedName() == parent1Name);
+                                      needSwap = breedData->parent2->isLocalName(parent1Name);
                                   }
                                   else if (hasParent2)
                                   {
-                                      needSwap = (breedData->parent1->getLocalizedName() == parent2Name);
+                                      needSwap = breedData->parent1->isLocalName(parent2Name);
                                   }
 
                                   breedingList.append(hasParent1 || hasParent2 ? breedData->copy(needSwap) : *breedData);

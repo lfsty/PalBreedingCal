@@ -3,7 +3,7 @@
 #include <BreedingModel.h>
 #include <QWidget>
 
-class PalModel;
+class DisplayPalModel;
 
 class BreedingView : public QWidget
 {
@@ -17,7 +17,7 @@ protected:
     void paintEvent(QPaintEvent* event) override;
 
 private:
-    void paintSinglePal(QPainter* painter, const QRect& rect, const PalModel* pal) const;
+    void paintSinglePal(QPainter* painter, const QRect& rect, const DisplayPalModel* pal) const;
 
 private:
     BreedingModel m_model;
