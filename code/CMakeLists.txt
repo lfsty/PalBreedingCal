@@ -21,6 +21,4 @@ target_link_libraries(${EXE_NAME} PRIVATE
     view
 )
 
-if(BUILD_TESTS)
-    add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/tests)
-endif()
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/tests)

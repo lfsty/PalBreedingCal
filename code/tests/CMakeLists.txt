@@ -11,12 +11,12 @@ set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
 set(SOURCES_LIST
-    ${CMAKE_CURRENT_LIST_DIR}/src/test_BreedingModel.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/test_DisplayPalManager.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/test_DisplayPalModel.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/test_PlayerManager.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/test_PlayerModel.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/test_PlayerPalModel.cpp
+    src/test_BreedingModel.cpp
+    src/test_DisplayPalManager.cpp
+    src/test_DisplayPalModel.cpp
+    src/test_PlayerManager.cpp
+    src/test_PlayerModel.cpp
+    src/test_PlayerPalModel.cpp
 )
 
 set(PROJECT_SOURCE_LIST
