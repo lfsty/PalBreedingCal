@@ -4,7 +4,7 @@
 #include <QPainter>
 
 #include <BreedingModel.h>
-#include <PalModel.h>
+#include <DisplayPalModel.h>
 
 BreedingView::BreedingView(const BreedingModel& model, QWidget* parent) : QWidget(parent)
 {
@@ -59,7 +59,7 @@ void BreedingView::paintEvent(QPaintEvent* event)
     painter.drawText(paintPlusRect.translated(palContentWidth + palContentHeight, 0), Qt::AlignCenter, "=");
 }
 
-void BreedingView::paintSinglePal(QPainter* painter, const QRect& rect, const PalModel* pal) const
+void BreedingView::paintSinglePal(QPainter* painter, const QRect& rect, const DisplayPalModel* pal) const
 {
     if (!pal)
     {

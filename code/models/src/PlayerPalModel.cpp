@@ -2,7 +2,8 @@
 
 #include <QJsonObject>
 
-#include <PalManager.h>
+#include <DisplayPalManager.h>
+#include <DisplayPalModel.h>
 
 #include <QDebug>
 
@@ -55,10 +56,10 @@ bool PlayerPalModel::loadPalModel(const QJsonObject& jsonObject)
         internamPalName = type;
     }
 
-    const PalModel* palModel = PalManager::getInstance()->getPalModel(internamPalName);
+    const DisplayPalModel* palModel = DisplayPalManager::getInstance()->getDisplayPalModel(internamPalName);
     if (!palModel)
     {
-        qDebug() << "PalModel not found: " << internamPalName;
+        qDebug() << "DisplayPalModel not found: " << internamPalName;
         return false;
     }
 
@@ -69,8 +70,8 @@ bool PlayerPalModel::loadPalModel(const QJsonObject& jsonObject)
 
 PlayerPalModel& PlayerPalModel::operator=(const PalModel& palModel)
 {
-    this->m_internalName  = palModel.getInternalName();
-    this->m_localizedName = palModel.getLocalizedName();
+    setInternalName(palModel.getInternalName());
+    setLocalizedName(palModel.getLocalizedName());
 
     return *this;
 }

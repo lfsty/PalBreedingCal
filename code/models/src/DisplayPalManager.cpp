@@ -1,4 +1,4 @@
-#include "PalManager.h"
+#include "DisplayPalManager.h"
 
 #include <QFile>
 #include <QJsonArray>
@@ -6,22 +6,22 @@
 #include <QJsonObject>
 #include <QtConcurrent>
 
-#include <PalModel.h>
+#include <DisplayPalModel.h>
 #include <PlayerModel.h>
 
 #include <QDebug>
 
-PalManager* PalManager::getInstance()
+DisplayPalManager* DisplayPalManager::getInstance()
 {
-    static PalManager instance;
+    static DisplayPalManager instance;
     return &instance;
 }
 
-PalManager::PalManager()
+DisplayPalManager::DisplayPalManager()
 {
 }
 
-PalManager::~PalManager()
+DisplayPalManager::~DisplayPalManager()
 {
     for (auto& pal : m_palMap)
     {
@@ -36,7 +36,7 @@ PalManager::~PalManager()
     m_breedingList.clear();
 }
 
-void PalManager::requestLoadDB(const QString& palDBPath, const QString& breedingDbPath)
+void DisplayPalManager::requestLoadDB(const QString& palDBPath, const QString& breedingDbPath)
 {
     QtConcurrent::run([=]()
                       {
@@ -61,7 +61,7 @@ void PalManager::requestLoadDB(const QString& palDBPath, const QString& breeding
                       });
 }
 
-const PalModel* PalManager::getPalModel(const QString& internalPalName) const
+const DisplayPalModel* DisplayPalManager::getDisplayPalModel(const QString& internalPalName) const
 {
     if (!m_palMap.contains(internalPalName))
     {
@@ -70,7 +70,7 @@ const PalModel* PalManager::getPalModel(const QString& internalPalName) const
     return m_palMap[internalPalName];
 }
 
-void PalManager::updataOwnedPal(const PlayerModel* playerModel)
+void DisplayPalManager::updataOwnedPal(const PlayerModel* playerModel)
 {
     if (!playerModel)
     {
@@ -83,7 +83,7 @@ void PalManager::updataOwnedPal(const PlayerModel* playerModel)
     }
 }
 
-bool PalManager::loadPalDB(const QString& palDBPath)
+bool DisplayPalManager::loadPalDB(const QString& palDBPath)
 {
     // 加载db.json
     QFile palDBFile(palDBPath);
@@ -98,7 +98,7 @@ bool PalManager::loadPalDB(const QString& palDBPath)
 
     for (const QJsonValue& palValue : palArray)
     {
-        PalModel* palModel = new PalModel();
+        DisplayPalModel* palModel = new DisplayPalModel();
         if (!palModel->loadPalModel(palValue.toObject()))
         {
             qDebug() << "load error: " << palValue;
@@ -121,7 +121,7 @@ bool PalManager::loadPalDB(const QString& palDBPath)
     }
 }
 
-bool PalManager::loadBreedingDB(const QString& breedingDbPath)
+bool DisplayPalManager::loadBreedingDB(const QString& breedingDbPath)
 {
     // 加载breeding.json
     QFile breedingDBFile(breedingDbPath);
@@ -148,13 +148,13 @@ bool PalManager::loadBreedingDB(const QString& breedingDbPath)
             continue;
         }
 
-        PalModel* parent1PalModel = m_palMap.value(parent1, nullptr);
-        PalModel* parent2PalModel = m_palMap.value(parent2, nullptr);
-        PalModel* childPalModel   = m_palMap.value(child, nullptr);
+        DisplayPalModel* parent1PalModel = m_palMap.value(parent1, nullptr);
+        DisplayPalModel* parent2PalModel = m_palMap.value(parent2, nullptr);
+        DisplayPalModel* childPalModel   = m_palMap.value(child, nullptr);
 
         if (!parent1PalModel || !parent2PalModel || !childPalModel)
         {
-            qDebug() << "PalModel not loaded " << breedingObject;
+            qDebug() << "DisplayPalModel not loaded " << breedingObject;
             continue;
         }
 
@@ -173,7 +173,7 @@ bool PalManager::loadBreedingDB(const QString& breedingDbPath)
     }
 }
 
-void PalManager::buildIndexes()
+void DisplayPalManager::buildIndexes()
 {
     m_parentIndex.clear();
     m_childIndex.clear();
@@ -190,7 +190,7 @@ void PalManager::buildIndexes()
     }
 }
 
-QSet<BreedingModel*> PalManager::getBreedingListByFilter(const QString& parent1Name, const QString& parent2Name, const QString& childName) const
+QSet<BreedingModel*> DisplayPalManager::getBreedingListByFilter(const QString& parent1Name, const QString& parent2Name, const QString& childName) const
 {
     const bool hasParent1 = !parent1Name.isEmpty();
     const bool hasParent2 = !parent2Name.isEmpty();

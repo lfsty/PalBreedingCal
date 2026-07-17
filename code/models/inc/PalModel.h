@@ -7,18 +7,22 @@ class PalModel
 {
 public:
     PalModel();
-    ~PalModel();
+    virtual ~PalModel();
 
 public:
-    virtual bool loadPalModel(const QJsonObject& jsonObject);
+    virtual bool loadPalModel(const QJsonObject& jsonObject) = 0;
 
     const QString& getInternalName() const { return m_internalName; }
     const QString& getLocalizedName() const { return m_localizedName; }
-    const bool isOwned() const { return m_owned; }
-    void setOwned(bool owned) { m_owned = owned; }
 
 protected:
+    void setInternalName(const QString& internalName) { m_internalName = internalName; }
+    void setLocalizedName(const QString& localizedName) { m_localizedName = localizedName; }
+
+private:
     QString m_internalName;
     QString m_localizedName;
-    bool m_owned = false;
+
+public:
+    friend QDebug operator<<(QDebug debug, const PalModel& data);
 };

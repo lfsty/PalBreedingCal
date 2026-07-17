@@ -14,7 +14,7 @@ public:
 
 public:
     PlayerPalModel();
-    ~PlayerPalModel();
+    ~PlayerPalModel() override;
 
 public:
     bool loadPalModel(const QJsonObject& jsonObject) override;
