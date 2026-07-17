@@ -84,3 +84,52 @@ TEST(DisplayPalModel, gender)
     ASSERT_TRUE(palModel.getOwnedGender() & Gender::Female);
     ASSERT_FALSE(palModel.getOwnedGender() & Gender::NOTSET);
 }
+
+// ==================== loadPalModel: 边界条件 ====================
+
+TEST(DisplayPalModel, load_missing_internal_name_returns_false)
+{
+    QJsonObject obj;
+    obj["LocalizedNames"] = QJsonObject();
+    DisplayPalModel palModel;
+    EXPECT_FALSE(palModel.loadPalModel(obj));
+}
+
+TEST(DisplayPalModel, load_missing_localized_names_returns_false)
+{
+    QJsonObject obj;
+    obj["InternalName"] = "Test";
+    DisplayPalModel palModel;
+    EXPECT_FALSE(palModel.loadPalModel(obj));
+}
+
+// ==================== isLocalName ====================
+
+TEST(DisplayPalModel, isLocalName_exact_match)
+{
+    QJsonDocument doc = QJsonDocument::fromJson(g_rawPalJsonData.toUtf8());
+    DisplayPalModel palModel;
+    ASSERT_TRUE(palModel.loadPalModel(doc.object()));
+
+    EXPECT_TRUE(palModel.isLocalName(QString::fromUtf8("妮瞅莎")));
+}
+
+TEST(DisplayPalModel, isLocalName_mismatch)
+{
+    QJsonDocument doc = QJsonDocument::fromJson(g_rawPalJsonData.toUtf8());
+    DisplayPalModel palModel;
+    ASSERT_TRUE(palModel.loadPalModel(doc.object()));
+
+    EXPECT_FALSE(palModel.isLocalName(QString::fromUtf8("不认识")));
+}
+
+// ==================== 默认状态 ====================
+
+TEST(DisplayPalModel, default_state)
+{
+    DisplayPalModel palModel;
+    EXPECT_FALSE(palModel.isOwned());
+    EXPECT_TRUE(palModel.getOwnedGender() & Gender::NOTSET);
+    EXPECT_TRUE(palModel.getInternalName().isEmpty());
+    EXPECT_TRUE(palModel.getLocalizedName().isEmpty());
+}
