@@ -4,9 +4,9 @@
 
 enum Gender
 {
-    NOTSET = 0x00,
-    Male   = 0x01,
-    Female = 0x02,
+    NOTSET = 0x01,
+    Male   = 0x02,
+    Female = 0x04,
 };
 
 Q_DECLARE_FLAGS(Genders, Gender)
